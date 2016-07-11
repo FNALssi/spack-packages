@@ -25,15 +25,24 @@
 from spack import *
 
 
-class LibjsonC(Package):
-    """ A JSON implementation in C """
-    homepage = "https://github.com/json-c/json-c/wiki"
-    url      = "https://s3.amazonaws.com/json-c_releases/releases/json-c-0.11.tar.gz"
+class RStringr(Package):
+    """A consistent, simple and easy to use set of wrappers around the
+    fantastic 'stringi' package. All function and argument names (and
+    positions) are consistent, all functions deal with "NA"'s and zero length
+    vectors in the same way, and the output from one function is easy to feed
+    into the input of another."""
 
-    version('0.11', 'aa02367d2f7a830bf1e3376f77881e98')
+    homepage = "https://cran.r-project.org/web/packages/stringr/index.html"
+    url      = "https://cran.r-project.org/src/contrib/stringr_1.0.0.tar.gz"
+    list_url = "https://cran.r-project.org/src/contrib/Archive/stringr"
+
+    version('1.0.0', '5ca977c90351f78b1b888b379114a7b4')
+
+    extends('R')
+
+    depends_on('r-stringi')
+    depends_on('r-magrittr')
 
     def install(self, spec, prefix):
-        configure('--prefix=%s' % prefix)
-
-        make(parallel=False)
-        make("install")
+        R('CMD', 'INSTALL', '--library={0}'.format(self.module.r_lib_dir),
+          self.stage.source_path)

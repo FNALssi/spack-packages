@@ -25,15 +25,19 @@
 from spack import *
 
 
-class LibjsonC(Package):
-    """ A JSON implementation in C """
-    homepage = "https://github.com/json-c/json-c/wiki"
-    url      = "https://s3.amazonaws.com/json-c_releases/releases/json-c-0.11.tar.gz"
+class RInline(Package):
+    """Functionality to dynamically define R functions and S4 methods with
+    inlined C, C++ or Fortran code supporting .C and .Call calling
+    conventions."""
 
-    version('0.11', 'aa02367d2f7a830bf1e3376f77881e98')
+    homepage = "https://cran.r-project.org/web/packages/inline/index.html"
+    url      = "https://cran.r-project.org/src/contrib/inline_0.3.14.tar.gz"
+    list_url = "https://cran.r-project.org/src/contrib/Archive/inline"
+
+    version('0.3.14', '9fe304a6ebf0e3889c4c6a7ad1c50bca')
+
+    extends('R')
 
     def install(self, spec, prefix):
-        configure('--prefix=%s' % prefix)
-
-        make(parallel=False)
-        make("install")
+        R('CMD', 'INSTALL', '--library={0}'.format(self.module.r_lib_dir),
+          self.stage.source_path)

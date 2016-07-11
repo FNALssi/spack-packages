@@ -25,15 +25,23 @@
 from spack import *
 
 
-class LibjsonC(Package):
-    """ A JSON implementation in C """
-    homepage = "https://github.com/json-c/json-c/wiki"
-    url      = "https://s3.amazonaws.com/json-c_releases/releases/json-c-0.11.tar.gz"
+class RMunsell(Package):
+    """Provides easy access to, and manipulation of, the Munsell colours.
+    Provides a mapping between Munsell's original notation (e.g. "5R 5/10") and
+    hexadecimal strings suitable for use directly in R graphics. Also provides
+    utilities to explore slices through the Munsell colour tree, to transform
+    Munsell colours and display colour palettes."""
 
-    version('0.11', 'aa02367d2f7a830bf1e3376f77881e98')
+    homepage = "https://cran.r-project.org/web/packages/munsell/index.html"
+    url      = "https://cran.r-project.org/src/contrib/munsell_0.4.3.tar.gz"
+    list_url = "https://cran.r-project.org/src/contrib/Archive/munsell"
+
+    version('0.4.3', 'ebd205323dc37c948f499ee08be9c476')
+
+    extends('R')
+
+    depends_on('r-colorspace')
 
     def install(self, spec, prefix):
-        configure('--prefix=%s' % prefix)
-
-        make(parallel=False)
-        make("install")
+        R('CMD', 'INSTALL', '--library={0}'.format(self.module.r_lib_dir),
+          self.stage.source_path)

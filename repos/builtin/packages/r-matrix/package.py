@@ -25,15 +25,20 @@
 from spack import *
 
 
-class LibjsonC(Package):
-    """ A JSON implementation in C """
-    homepage = "https://github.com/json-c/json-c/wiki"
-    url      = "https://s3.amazonaws.com/json-c_releases/releases/json-c-0.11.tar.gz"
+class RMatrix(Package):
+    """Classes and methods for dense and sparse matrices and operations on them
+    using 'LAPACK' and 'SuiteSparse'."""
 
-    version('0.11', 'aa02367d2f7a830bf1e3376f77881e98')
+    homepage = "http://matrix.r-forge.r-project.org/"
+    url      = "https://cran.r-project.org/src/contrib/Matrix_1.2-6.tar.gz"
+    list_url = "https://cran.r-project.org/src/contrib/Archive/Matrix"
+
+    version('1.2-6', 'f545307fb1284861e9266c4e9712c55e')
+
+    extends('R')
+
+    depends_on('r-lattice')
 
     def install(self, spec, prefix):
-        configure('--prefix=%s' % prefix)
-
-        make(parallel=False)
-        make("install")
+        R('CMD', 'INSTALL', '--library={0}'.format(self.module.r_lib_dir),
+          self.stage.source_path)

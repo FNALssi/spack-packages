@@ -25,15 +25,17 @@
 from spack import *
 
 
-class LibjsonC(Package):
-    """ A JSON implementation in C """
-    homepage = "https://github.com/json-c/json-c/wiki"
-    url      = "https://s3.amazonaws.com/json-c_releases/releases/json-c-0.11.tar.gz"
+class RLabeling(Package):
+    """Provides a range of axis labeling algorithms."""
 
-    version('0.11', 'aa02367d2f7a830bf1e3376f77881e98')
+    homepage = "https://cran.r-project.org/web/packages/labeling/index.html"
+    url      = "https://cran.r-project.org/src/contrib/labeling_0.3.tar.gz"
+    list_url = "https://cran.r-project.org/src/contrib/Archive/labeling"
+
+    version('0.3', 'ccd7082ec0b211aba8a89d85176bb534')
+
+    extends('R')
 
     def install(self, spec, prefix):
-        configure('--prefix=%s' % prefix)
-
-        make(parallel=False)
-        make("install")
+        R('CMD', 'INSTALL', '--library={0}'.format(self.module.r_lib_dir),
+          self.stage.source_path)

@@ -25,15 +25,25 @@
 from spack import *
 
 
-class LibjsonC(Package):
-    """ A JSON implementation in C """
-    homepage = "https://github.com/json-c/json-c/wiki"
-    url      = "https://s3.amazonaws.com/json-c_releases/releases/json-c-0.11.tar.gz"
+class RScales(Package):
+    """Graphical scales map data to aesthetics, and provide methods for
+    automatically determining breaks and labels for axes and legends."""
 
-    version('0.11', 'aa02367d2f7a830bf1e3376f77881e98')
+    homepage = "https://github.com/hadley/scales"
+    url      = "https://cran.r-project.org/src/contrib/scales_0.4.0.tar.gz"
+    list_url = "https://cran.r-project.org/src/contrib/Archive/scales"
+
+    version('0.4.0', '7b5602d9c55595901192248bca25c099')
+
+    extends('R')
+
+    depends_on('r-rcolorbrewer')
+    depends_on('r-dichromat')
+    depends_on('r-plyr')
+    depends_on('r-munsell')
+    depends_on('r-labeling')
+    depends_on('r-rcpp')
 
     def install(self, spec, prefix):
-        configure('--prefix=%s' % prefix)
-
-        make(parallel=False)
-        make("install")
+        R('CMD', 'INSTALL', '--library={0}'.format(self.module.r_lib_dir),
+          self.stage.source_path)

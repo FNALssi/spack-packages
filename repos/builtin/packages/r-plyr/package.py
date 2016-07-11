@@ -25,15 +25,25 @@
 from spack import *
 
 
-class LibjsonC(Package):
-    """ A JSON implementation in C """
-    homepage = "https://github.com/json-c/json-c/wiki"
-    url      = "https://s3.amazonaws.com/json-c_releases/releases/json-c-0.11.tar.gz"
+class RPlyr(Package):
+    """A set of tools that solves a common set of problems: you need to break a
+    big problem down into manageable pieces, operate on each piece and then put
+    all the pieces back together. For example, you might want to fit a model to
+    each spatial location or time point in your study, summarise data by panels
+    or collapse high-dimensional arrays to simpler summary statistics. The
+    development of 'plyr' has been generously supported by 'Becton
+    Dickinson'."""
 
-    version('0.11', 'aa02367d2f7a830bf1e3376f77881e98')
+    homepage = "http://had.co.nz/plyr"
+    url      = "https://cran.r-project.org/src/contrib/plyr_1.8.4.tar.gz"
+    list_url = "https://cran.r-project.org/src/contrib/Archive/plyr"
+
+    version('1.8.4', 'ef455cf7fc06e34837692156b7b2587b')
+
+    extends('R')
+
+    depends_on('r-rcpp')
 
     def install(self, spec, prefix):
-        configure('--prefix=%s' % prefix)
-
-        make(parallel=False)
-        make("install")
+        R('CMD', 'INSTALL', '--library={0}'.format(self.module.r_lib_dir),
+          self.stage.source_path)

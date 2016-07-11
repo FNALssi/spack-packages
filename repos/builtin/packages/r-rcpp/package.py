@@ -25,15 +25,25 @@
 from spack import *
 
 
-class LibjsonC(Package):
-    """ A JSON implementation in C """
-    homepage = "https://github.com/json-c/json-c/wiki"
-    url      = "https://s3.amazonaws.com/json-c_releases/releases/json-c-0.11.tar.gz"
+class RRcpp(Package):
+    """The 'Rcpp' package provides R functions as well as C++ classes which
+    offer a seamless integration of R and C++. Many R data types and objects
+    can be mapped back and forth to C++ equivalents which facilitates both
+    writing of new code as well as easier integration of third-party libraries.
+    Documentation about 'Rcpp' is provided by several vignettes included in
+    this package, via the 'Rcpp Gallery' site at <http://gallery.rcpp.org>, the
+    paper by Eddelbuettel and Francois (2011, JSS), and the book by
+    Eddelbuettel (2013, Springer); see 'citation("Rcpp")' for details on these
+    last two."""
 
-    version('0.11', 'aa02367d2f7a830bf1e3376f77881e98')
+    homepage = "http://dirk.eddelbuettel.com/code/rcpp.html"
+    url      = "https://cran.r-project.org/src/contrib/Rcpp_0.12.5.tar.gz"
+    list_url = "https://cran.r-project.org/src/contrib/Archive/Rcpp"
+
+    version('0.12.5', 'f03ec05b4e391cc46e7ce330e82ff5e2')
+
+    extends('R')
 
     def install(self, spec, prefix):
-        configure('--prefix=%s' % prefix)
-
-        make(parallel=False)
-        make("install")
+        R('CMD', 'INSTALL', '--library={0}'.format(self.module.r_lib_dir),
+          self.stage.source_path)

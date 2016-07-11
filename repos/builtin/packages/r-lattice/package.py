@@ -25,15 +25,20 @@
 from spack import *
 
 
-class LibjsonC(Package):
-    """ A JSON implementation in C """
-    homepage = "https://github.com/json-c/json-c/wiki"
-    url      = "https://s3.amazonaws.com/json-c_releases/releases/json-c-0.11.tar.gz"
+class RLattice(Package):
+    """A powerful and elegant high-level data visualization system inspired by
+    Trellis graphics, with an emphasis on multivariate data. Lattice is
+    sufficient for typical graphics needs, and is also flexible enough to
+    handle most nonstandard requirements. See ?Lattice for an introduction."""
 
-    version('0.11', 'aa02367d2f7a830bf1e3376f77881e98')
+    homepage = "http://lattice.r-forge.r-project.org/"
+    url      = "https://cran.r-project.org/src/contrib/lattice_0.20-33.tar.gz"
+    list_url = "https://cran.r-project.org/src/contrib/Archive/lattice"
+
+    version('0.20-33', 'd487c94db1bfe00a27270f4c71baf53e')
+
+    extends('R')
 
     def install(self, spec, prefix):
-        configure('--prefix=%s' % prefix)
-
-        make(parallel=False)
-        make("install")
+        R('CMD', 'INSTALL', '--library={0}'.format(self.module.r_lib_dir),
+          self.stage.source_path)

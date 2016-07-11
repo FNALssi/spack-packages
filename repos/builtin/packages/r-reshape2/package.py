@@ -25,15 +25,22 @@
 from spack import *
 
 
-class LibjsonC(Package):
-    """ A JSON implementation in C """
-    homepage = "https://github.com/json-c/json-c/wiki"
-    url      = "https://s3.amazonaws.com/json-c_releases/releases/json-c-0.11.tar.gz"
+class RReshape2(Package):
+    """Flexibly restructure and aggregate data using just two functions: melt
+    and dcast (or acast)."""
 
-    version('0.11', 'aa02367d2f7a830bf1e3376f77881e98')
+    homepage = "https://github.com/hadley/reshape"
+    url      = "https://cran.r-project.org/src/contrib/reshape2_1.4.1.tar.gz"
+    list_url = "https://cran.r-project.org/src/contrib/Archive/reshape2"
+
+    version('1.4.1', '41e9dffdf5c6fa830321ac9c8ebffe00')
+
+    extends('R')
+
+    depends_on('r-plyr')
+    depends_on('r-stringr')
+    depends_on('r-rcpp')
 
     def install(self, spec, prefix):
-        configure('--prefix=%s' % prefix)
-
-        make(parallel=False)
-        make("install")
+        R('CMD', 'INSTALL', '--library={0}'.format(self.module.r_lib_dir),
+          self.stage.source_path)

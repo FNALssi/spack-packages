@@ -25,15 +25,18 @@
 from spack import *
 
 
-class LibjsonC(Package):
-    """ A JSON implementation in C """
-    homepage = "https://github.com/json-c/json-c/wiki"
-    url      = "https://s3.amazonaws.com/json-c_releases/releases/json-c-0.11.tar.gz"
+class RRcolorbrewer(Package):
+    """Provides color schemes for maps (and other graphics) designed by Cynthia
+    Brewer as described at http://colorbrewer2.org"""
 
-    version('0.11', 'aa02367d2f7a830bf1e3376f77881e98')
+    homepage = "http://colorbrewer2.org"
+    url      = "https://cran.r-project.org/src/contrib/RColorBrewer_1.1-2.tar.gz"
+    list_url = "https://cran.r-project.org/src/contrib/Archive/RColorBrewer"
+
+    version('1.1-2', '66054d83eade4dff8a43ad4732691182')
+
+    extends('R')
 
     def install(self, spec, prefix):
-        configure('--prefix=%s' % prefix)
-
-        make(parallel=False)
-        make("install")
+        R('CMD', 'INSTALL', '--library={0}'.format(self.module.r_lib_dir),
+          self.stage.source_path)
