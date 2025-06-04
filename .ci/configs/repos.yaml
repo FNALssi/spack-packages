@@ -1,2 +1,2 @@
-repos::
-  - ${CI_PROJECT_DIR}/repos/spack_repo/builtin
+repos:
+  builtin:: ${CI_PROJECT_DIR}/repos/spack_repo/builtin
