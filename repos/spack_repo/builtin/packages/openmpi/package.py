@@ -439,7 +439,7 @@ class Openmpi(AutotoolsPackage, CudaPackage):
     # Fix reduce operations for unsigned long integers
     # See https://github.com/open-mpi/ompi/issues/10648
     patch(
-        "https://github.com/open-mpi/ompi/commit/8e6d9ba8058a0c128438dbc0cd6476f1abb1d4f1.patch?full_index=1",
+        "https://github.com/open-mpi/ompi/commit/8e6d9ba8058a0c128438dbc0cd6476f1abb1d4f1.patch",
         sha256="12f3aabbcdb02f28138e250273c2f62591db4b1f9f8aa3dcc3ef9ed551f4f587",
         when="@4.0.7,4.1.2:4.1.4",
     )
@@ -460,7 +460,7 @@ class Openmpi(AutotoolsPackage, CudaPackage):
 
     # OpenMPI 5.0.7 specific patch - see https://github.com/open-mpi/ompi/pull/13106
     patch(
-        "https://github.com/open-mpi/ompi/commit/d10e9765bdd28e62621395aef6bbb7710bae2e82.patch?full_index=1",
+        "https://github.com/open-mpi/ompi/commit/d10e9765bdd28e62621395aef6bbb7710bae2e82.patch",
         sha256="38529b557df029d6a987fa7e337db40b0ac1c1bb921776b95aacaa40e945cd21",
         when="@4.1.8,5.0.7",
     )
