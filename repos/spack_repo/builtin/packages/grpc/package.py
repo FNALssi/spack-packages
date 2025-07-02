@@ -71,6 +71,8 @@ class Grpc(CMakePackage):
     depends_on("zlib-api")
     depends_on("c-ares")
 
+    conflicts("cxxstd=11", when="@1.50.0:")
+
     with when("@1.27:"):
         depends_on("abseil-cpp")
         # missing includes: https://github.com/grpc/grpc/commit/bc044174401a0842b36b8682936fc93b5041cf88
