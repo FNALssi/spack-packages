@@ -56,7 +56,7 @@ class Grpc(CMakePackage):
     )
     variant(
         "cxxstd",
-        default="11",
+        default="14",
         values=("11", "14", "17"),
         multi=False,
         description="Use the specified C++ standard when building.",
@@ -70,8 +70,6 @@ class Grpc(CMakePackage):
     depends_on("openssl")
     depends_on("zlib-api")
     depends_on("c-ares")
-
-    conflicts("cxxstd=11", when="@1.50.0:")
 
     with when("@1.27:"):
         depends_on("abseil-cpp")
