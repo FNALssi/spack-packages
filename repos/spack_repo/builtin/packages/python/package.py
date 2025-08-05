@@ -269,7 +269,7 @@ class Python(Package):
     extendable = True
 
     # Variants to avoid cyclical dependencies for concretizer
-    variant("libxml2", default=False, description="Use a gettext library build with libxml2")
+    variant("libxml2", default=True, description="Use a gettext library build with libxml2")
 
     variant(
         "debug", default=False, description="debug build with extra checks (this is high overhead)"
