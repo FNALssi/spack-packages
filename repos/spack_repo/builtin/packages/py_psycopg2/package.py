@@ -33,8 +33,9 @@ class PyPsycopg2(PythonPackage):
 
     depends_on("py-setuptools", type="build")
 
-    depends_on("postgresql@9.1:17", when="@2.9.10:", type=("build", "link", "run"))
-    depends_on("postgresql@9.1:15", when="@2.9.4:", type=("build", "link", "run"))
+
+    depends_on("postgresql@9.1:18", when="@2.9.10:", type=("build", "link", "run"))
+    depends_on("postgresql@9.1:15", when="@2.9.4:2.9.9", type=("build", "link", "run"))
     depends_on("postgresql@9.1:14", when="@2.9.2:2.9.3", type=("build", "link", "run"))
     depends_on("postgresql@9.1:13", when="@2.9:2.9.1", type=("build", "link", "run"))
     depends_on("postgresql@9.1:12", when="@2.8.4:2.8", type=("build", "link", "run"))
