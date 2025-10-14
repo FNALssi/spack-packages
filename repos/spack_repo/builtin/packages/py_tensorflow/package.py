@@ -989,7 +989,6 @@ class PyTensorflow(Package, CudaPackage, ROCmPackage, PythonExtension):
             build_pip_package("--src", buildpath)
 
     def install(self, spec, prefix):
-        tmp_path = env["TEST_TMPDIR"]
         if self.spec.satisfies("@2.17:"):
             buildpath = join_path(
                 self.stage.source_path, "bazel-bin/tensorflow/tools/pip_package/wheel_house/"
@@ -1001,5 +1000,3 @@ class PyTensorflow(Package, CudaPackage, ROCmPackage, PythonExtension):
             buildpath = join_path(self.stage.source_path, "spack-build")
             with working_dir(buildpath):
                 pip(*PythonPipBuilder.std_args(self), f"--prefix={self.prefix}", ".")
-
-        remove_linked_tree(tmp_path)
