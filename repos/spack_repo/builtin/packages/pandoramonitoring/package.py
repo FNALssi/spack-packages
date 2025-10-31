@@ -21,6 +21,7 @@ class Pandoramonitoring(CMakePackage):
     maintainers("jmcarcell", "wdconinc")
 
     version("master", branch="master")
+    version("4.0.2", sha256="526d12936eb995e2a70b8b4f42ad57ca017705a748a9f3909815ceb6e6053e03")
     version("3.6.0", sha256="5fc9574faa3e90d96e5d2a27dea46b55f844499cf21e39060acb1e4c080dec77")
     version("3.5.0", sha256="274562abb7c797194634d5460a56227444a1de07a240c88ae35ca806abcbaf60")
 
