@@ -15,6 +15,9 @@ class PyZipp(PythonPackage):
 
     license("MIT")
 
+    def patch(self):
+        filter_file('license = "MIT"', 'license = {text ="MIT"}', "project.toml")
+
     version("3.23.0", sha256="a07157588a12518c9d4034df3fbbee09c814741a33ff63c05fa29d26a2404166")
     version("3.17.0", sha256="84e64a1c28cf7e91ed2078bb8cc8c259cb19b76942096c8d7b84947690cabaf0")
     version("3.8.1", sha256="05b45f1ee8f807d0cc928485ca40a07cb491cf092ff587c0df9cb1fd154848d2")
