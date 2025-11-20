@@ -1,0 +1,20 @@
+--- maturin-1.9.6/pyproject.toml        2025-10-07 07:34:28.000000000 -0500
++++ spack-src/pyproject.toml    2025-11-20 14:09:50.304413999 -0600
+@@ -14,11 +14,11 @@
+ authors = [{ name = "konstin", email = "konstin@mailbox.org" }]
+ readme = { file = "README.md", content-type = "text/markdown" }
+ requires-python = ">=3.7"
+-license = "MIT OR Apache-2.0"
+-license-files = [
+-    "license-mit",
+-    "license-apache",
+-]
++license = {text = "MIT OR Apache-2.0"}
++#license-files = [
++#    "license-mit",
++#    "license-apache",
++#]
+ classifiers = [
+     "Topic :: Software Development :: Build Tools",
+     "Programming Language :: Rust",
+
