@@ -17,6 +17,9 @@ class PyRucioClients(PythonPackage):
 
     license("Apache-2.0", checked_by="wdconinc")
 
+
+    version("39.0.0", sha256="a83632897cfc2cc9052848b1b795fb71b2cf8d0a7920a6cff1f7367874bac72a")
+    version("38.5.1", sha256="3cfe97c5e5996cfc5861b259ff0bed3369e7379bcaa826b6d181ee5b939ac401")
     version("37.3.0", sha256="b4bca8d451bc34528797ca188884a0c8b5ddfef2d32803765e6333455879f819")
     version(
         "36.0.0.post2", sha256="48ac2e3217aac9aaa70133cbfff991560bbeb162165bcf3dd3425967c8a2f816"
@@ -40,10 +43,11 @@ class PyRucioClients(PythonPackage):
     depends_on("python@3.9:", type=("build", "run"))
     depends_on("py-setuptools", type="build")
     depends_on("py-requests@2.32.2:", type=("build", "run"), when="@:36")
-    depends_on("py-urllib3@1.26.18:", type=("build", "run"), when="@:36")
     depends_on("py-requests@2.32.3:", type=("build", "run"), when="@37:")
-    depends_on("py-urllib3@2.3.0:", type=("build", "run"), when="@37:")
-    depends_on("py-dogpile-cache@1.2.2:", type=("build", "run"))
+    #depends_on("py-urllib3@1.26.18:", type=("build", "run"), when="@:36")
+    #depends_on("py-urllib3@2.3.0:", type=("build", "run"), when="@37:")
+    depends_on("py-urllib3", type=("build", "run"))
+    # depends_on("py-dogpile-cache@1.2.2:", type=("build", "run"))
     depends_on("py-tabulate@0.9.0:", type=("build", "run"))
     depends_on("py-jsonschema@4.20.0:", type=("build", "run"), when="@:36")
     depends_on("py-jsonschema@4.23.0:", type=("build", "run"), when="@37:")
@@ -53,6 +57,7 @@ class PyRucioClients(PythonPackage):
     depends_on("py-rich@13.9.4:", type=("build", "run"), when="@37:")
     depends_on("py-typing-extensions@4.12.2:", type=("build", "run"))
     depends_on("py-click@8.1.7:", type=("build", "run"), when="@37:")
+    depends_on("gfal2",  type=("build", "run"))
 
     with when("+ssh"):
         depends_on("py-paramiko@3.4.0:", when="@:36")
