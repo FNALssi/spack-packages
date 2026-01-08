@@ -47,7 +47,7 @@ class PyRucioClients(PythonPackage):
     #depends_on("py-urllib3@1.26.18:", type=("build", "run"), when="@:36")
     #depends_on("py-urllib3@2.3.0:", type=("build", "run"), when="@37:")
     depends_on("py-urllib3", type=("build", "run"))
-    # depends_on("py-dogpile-cache@1.2.2:", type=("build", "run"))
+    depends_on("py-dogpile-cache@1.2.2:", type=("build", "run"))
     depends_on("py-tabulate@0.9.0:", type=("build", "run"))
     depends_on("py-jsonschema@4.20.0:", type=("build", "run"), when="@:36")
     depends_on("py-jsonschema@4.23.0:", type=("build", "run"), when="@37:")
