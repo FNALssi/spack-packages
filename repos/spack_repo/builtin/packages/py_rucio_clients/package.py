@@ -5,7 +5,8 @@
 from spack_repo.builtin.build_systems.python import PythonPackage
 
 from spack.package import *
-
+import glob
+import os
 
 class PyRucioClients(PythonPackage):
     """Rucio Client Lite Package"""
@@ -40,7 +41,7 @@ class PyRucioClients(PythonPackage):
     variant("dumper", default=False, description="Enable file type identification using libmagic")
 
     # requirements/requirements.client.txt
-    depends_on("python@3.9:", type=("build", "run"))
+    depends_on("python", type=("build", "run"))
     depends_on("py-setuptools", type="build")
     depends_on("py-requests@2.32.2:", type=("build", "run"), when="@:36")
     depends_on("py-requests@2.32.3:", type=("build", "run"), when="@37:")
@@ -57,7 +58,7 @@ class PyRucioClients(PythonPackage):
     depends_on("py-rich@13.9.4:", type=("build", "run"), when="@37:")
     depends_on("py-typing-extensions@4.12.2:", type=("build", "run"))
     depends_on("py-click@8.1.7:", type=("build", "run"), when="@37:")
-    depends_on("gfal2",  type=("build", "run"))
+    depends_on("py-gfal2-python",  type=("build", "run"))
 
     with when("+ssh"):
         depends_on("py-paramiko@3.4.0:", when="@:36")
