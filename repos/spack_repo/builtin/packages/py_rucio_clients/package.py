@@ -58,7 +58,7 @@ class PyRucioClients(PythonPackage):
     depends_on("py-typing-extensions@4.12.2:", type=("build", "run"))
     depends_on("py-typing-extensions@4.14.0:", type=("build", "run"), when="@38:")
     depends_on("py-click@8.1.7:", type=("build", "run"), when="@37:")
-    depends_on("gfal2",  type=("build", "run"))
+    depends_on("py-gfal2-python",  type=("build", "run"))
 
     with when("+ssh"):
         depends_on("py-paramiko@3.4.0:", when="@:36")
