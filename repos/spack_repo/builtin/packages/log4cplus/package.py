@@ -22,3 +22,4 @@ class Log4cplus(CMakePackage):
     version("1.2.1", sha256="ada80be050033d7636beb894eb54de5575ceca95a5572e9437b0fc4ed7d877c4")
 
     depends_on("cxx", type="build")  # generated
+    depends_on("c", type="build")
