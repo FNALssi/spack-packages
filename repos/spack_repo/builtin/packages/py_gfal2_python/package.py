@@ -19,8 +19,8 @@ class PyGfal2Python(PythonPackage):
 
     version("1.13.0", sha256="5be42cc894fa20af3d6f6dbb30dfd4d29ab49bd5f15b3e3e754aa25c5ed17997")
 
-    depends_on("cxx", type="build")
     depends_on("c", type="build")
+    depends_on("cxx", type="build")
     depends_on("python", type="build")
 
     depends_on("py-setuptools", type="build")
