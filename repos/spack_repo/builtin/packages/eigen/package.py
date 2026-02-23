@@ -14,11 +14,11 @@ class Eigen(CMakePackage, ROCmPackage):
     vectors, numerical solvers, and related algorithms.
     """
 
-    homepage = "https://eigen.tuxfamily.org/"
+    homepage = "https://libeigen.gitlab.io/"
     git = "https://gitlab.com/libeigen/eigen.git"
     url = "https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz"
 
-    maintainers("HaoZeke")
+    maintainers("HaoZeke", "jcortial-safran")
 
     license("MPL-2.0")
 
@@ -86,7 +86,7 @@ class Eigen(CMakePackage, ROCmPackage):
     # Building eigen-based LAPACK implementation requires to also build BLAS
     conflicts("~blas", when="+lapack")
 
-    conflicts("platform=windows", when="@3.4.1")
+    conflicts("platform=windows", when="@3.4.1 +blas")
 
     # there is a bug in 3.3.4 that provokes a compile error with the xl compiler
     # See https://gitlab.com/libeigen/eigen/-/issues/1555
