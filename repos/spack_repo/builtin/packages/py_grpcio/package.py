@@ -15,8 +15,8 @@ class PyGrpcio(PythonPackage):
    
     license("Apache-2.0")
 
-#    version("1.75.0", sha256="b989e8b09489478c2d19fecc744a298930f40d8b27c3638afbfe84d22f36ce4e")
-#    version("1.71.0", sha256="2b85f7820475ad3edec209d3d89a7909ada16caab05d3f2e08a7e8ae3200a55c")
+    version("1.75.0", sha256="b989e8b09489478c2d19fecc744a298930f40d8b27c3638afbfe84d22f36ce4e")
+    version("1.71.0", sha256="2b85f7820475ad3edec209d3d89a7909ada16caab05d3f2e08a7e8ae3200a55c")
     version("1.67.1",
             sha256="3dc2ed4cabea4dc14d5e708c2b426205956077cc5de419b4d4079315017e9732",
             url = "https://files.pythonhosted.org/packages/20/53/d9282a66a5db45981499190b77790570617a604a38f3d103d0400974aeb5/grpcio-1.67.1.tar.gz" )
