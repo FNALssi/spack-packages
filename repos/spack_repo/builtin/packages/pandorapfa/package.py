@@ -22,6 +22,7 @@ class Pandorapfa(Package):
     maintainers("jmcarcell", "wdconinc")
 
     version("master", branch="master")
+    version("4.17.5", sha256="740818e9162ba9f795906315029a2f066d55651855672d200cbd8c36acb8d86b")
     version("4.17.4", sha256="c8c35258cb447372ddb17b8647b4a7ce912e74ee9b0cbad470daadf669888393")
     version("4.16.3", sha256="68b149449fcc5b1c21567092cdebc723c2c150cd2d73689453a081fb05619f36")
     version("4.15.2", sha256="ed52c05e70452548ca97015ea255437698c9b97637c2da6a7d452bc2d16b980b")
