@@ -663,7 +663,6 @@ class Root(CMakePackage):
             define("gnuinstall", True),
             define("libcxx", False),
             define("roottest", False),
-            define_from_variant("runtime_cxxmodules", "cxxmodules"),
             define_from_variant("rpath"),
             define("shared", True),
             define("soversion", True),
