@@ -834,8 +834,8 @@ class Opencv(CMakePackage, CudaPackage):
     conflicts("+win32ui", when="platform=linux", msg="Windows only")
 
     # https://github.com/opencv/opencv/wiki/ChangeLog#version460
-    conflicts("%gcc@12:", when="@:4.5")
-    conflicts("%clang@15:", when="@:4.5")
+    #conflicts("%gcc@12:", when="@:4.5")
+    #conflicts("%clang@15:", when="@:4.5")
 
     @classmethod
     def determine_version(cls, lib):
