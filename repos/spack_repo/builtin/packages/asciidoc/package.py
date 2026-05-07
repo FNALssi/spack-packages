@@ -25,6 +25,8 @@ class Asciidoc(AutotoolsPackage, PythonPackage):
         default="python_pip",
     )
 
+    extends("python")
+
     version("master", branch="master")
     version("10.2.0", sha256="684ea53c1f5b71d6d1ac6086bbc96906b1f709ecc7ab536615b0f0c9e1baa3cc")
     version("9.1.0", sha256="5056c20157349f8dc74f005b6e88ccbf1078c4e26068876f13ca3d1d7d045fe7")
