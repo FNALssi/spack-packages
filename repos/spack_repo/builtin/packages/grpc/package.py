@@ -128,9 +128,9 @@ class Grpc(CMakePackage):
                 join_path(self.stage.source_path, "include/grpc/support/port_platform.h"),
             )
 
-        # glob.cc uses std::min/std::max but omits <algorithm>
-        filter_file(
-            r'(#include "absl/strings/string_view.h")',
-            '#include <algorithm>\n#include "absl/strings/string_view.h"',
-            join_path(self.stage.source_path, "src/core/util/glob.cc"),
-        )
+            # glob.cc uses std::min/std::max but omits <algorithm>
+            filter_file(
+                r'(#include "absl/strings/string_view.h")',
+                '#include <algorithm>\n#include "absl/strings/string_view.h"',
+                join_path(self.stage.source_path, "src/core/util/glob.cc"),
+            )
