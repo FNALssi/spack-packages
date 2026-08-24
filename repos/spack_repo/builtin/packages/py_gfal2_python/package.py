@@ -25,6 +25,7 @@ class PyGfal2Python(PythonPackage):
 
     depends_on("py-setuptools", type="build")
     depends_on("cmake", type="build")
+    depends_on("gmake", type="build")
 
     depends_on("boost +python")
     depends_on("glib")
