@@ -336,6 +336,7 @@ class Root(CMakePackage):
         depends_on("glibc@2.25:", when="^[virtuals=libc] glibc")
         depends_on("musl@1.1.20:", when="^[virtuals=libc] musl")
 
+    depends_on("gmake") #PG needed because ninja invoking make in subpackage build results in jobserver error.
     depends_on("freetype")
     depends_on("giflib")
     depends_on("jpeg")
