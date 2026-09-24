@@ -41,6 +41,6 @@ class PyMditPyPlugins(PythonPackage):
         depends_on("py-markdown-it-py@1:1", when="@0.2")
 
     def url_for_version(self, version):
-        prefix = self.url.rsplit("/", maxsplit=1)[0]
+        prefix = self.urls[0].rsplit("/", maxsplit=1)[0]
         package = "mdit-py-plugins" if version < Version("2.0.0") else "mdit_py_plugins"
         return f"{prefix}/{package}-{version}.tar.gz"

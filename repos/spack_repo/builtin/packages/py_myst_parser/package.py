@@ -69,6 +69,6 @@ class PyMystParser(PythonPackage):
         depends_on("py-typing-extensions", when="@:1")
 
     def url_for_version(self, version):
-        prefix = self.url.rsplit("/", maxsplit=1)[0]
+        prefix = self.urls[0].rsplit("/", maxsplit=1)[0]
         package = "myst-parser" if version < Version("2.0.0") else "myst_parser"
         return f"{prefix}/{package}-{version}.tar.gz"
