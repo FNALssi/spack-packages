@@ -214,10 +214,11 @@ def _urls(cls: "PythonPackage") -> Optional[str]:
     if cls.pypi:
         # handle both older mixed case and recent lowercased package urls
         url = _url(cls)
-        urls = [ url.lower(), url ]
-        #tty.debug("_urls: returning {urls=}")
+        urls = [url.lower(), url]
+        # tty.debug("_urls: returning {urls=}")
         return urls
     return []
+
 
 def _url(cls: "PythonPackage") -> Optional[str]:
     if cls.pypi:
