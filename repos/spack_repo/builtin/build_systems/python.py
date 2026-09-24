@@ -214,7 +214,7 @@ def _urls(cls: "PythonPackage") -> Optional[str]:
     if cls.pypi and not hasattr(cls, 'url'):
         # handle both older mixed case and recent lowercased package urls
         url = _url(cls)
-        urls = [url.lower().replace('-','_'), url]
+        urls = [url.lower().replace("-","_"), url]
         # tty.debug("_urls: returning {urls=}")
         return urls
     return []
