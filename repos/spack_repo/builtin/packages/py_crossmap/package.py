@@ -8,7 +8,7 @@ from spack_repo.builtin.build_systems.sourceforge import SourceforgePackage
 from spack.package import *
 
 
-class PyCrossmap(PythonPackage, SourceforgePackage):
+class PyCrossmap(SourceforgePackage, PythonPackage):
     """CrossMap is a program for convenient conversion of genome coordinates
     (or annotation files) between different assemblies"""
 

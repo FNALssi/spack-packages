@@ -24,7 +24,7 @@ class PyMditPyPlugins(PythonPackage):
     version("0.2.8", sha256="5991cef645502e80a5388ec4fc20885d2313d4871e8b8e320ca2de14ac0c015f")
 
     def url_for_version(self, version):
-        prefix = self.url.rsplit("/", maxsplit=1)[0]
+        prefix = self.urls[0].rsplit("/", maxsplit=1)[0]
         package = "mdit-py-plugins" if version < Version("2.0.0") else "mdit_py_plugins"
         return f"{prefix}/{package}-{version}.tar.gz"
 
