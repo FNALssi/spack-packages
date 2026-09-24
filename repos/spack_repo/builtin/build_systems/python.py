@@ -211,7 +211,7 @@ def _homepage(cls: "PythonPackage") -> Optional[str]:
 
 
 def _urls(cls: "PythonPackage") -> Optional[str]:
-    if cls.pypi and not hasattr(cls, 'url'):
+    if cls.pypi and not hasattr(cls, 'url') and not hasattr(cls, 'sourceforge_mirror_path'):
         # handle both older mixed case and recent lowercased package urls
         url = _url(cls)
         urls = [url.lower(), url]
