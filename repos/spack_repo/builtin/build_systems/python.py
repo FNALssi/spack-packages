@@ -211,7 +211,7 @@ def _homepage(cls: "PythonPackage") -> Optional[str]:
 
 
 def _urls(cls: "PythonPackage") -> Optional[str]:
-    if cls.pypi and not hasattr(cls, 'url'):
+    if cls.pypi and not hasattr(cls, "url"):
         # handle both older mixed case and recent lowercased package urls
         url = _url(cls)
         urls = [url.lower().replace("-", "_"), url]
