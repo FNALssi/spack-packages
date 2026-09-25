@@ -207,8 +207,8 @@ for module in sys.argv[1:]:
         """ check pypi.org json api and return data """
         if self.pypi:
             import json
-            import spack.util.web as web_util
             import urllib
+            import spack.util.web as web_util
 
             ps = self.pypi.split("/")[0]
             api_url = f"https://pypi.org/pypi/{ps}/json"
