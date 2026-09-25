@@ -6,6 +6,7 @@ import os
 import re
 import shutil
 import stat
+from functools import lru_cache
 from typing import Dict, Iterable, List, Mapping, Optional, Tuple
 
 from spack.package import (
@@ -201,12 +202,14 @@ for module in sys.argv[1:]:
                 *self.import_modules,
             )
 
-    def url_for_version(self, version):
-        if self.pypi: 
+    @lru_cache(maxsize=32)
+    def _get_pypi_info(self):
+        if self.pypi:
             import urllib
             import spack.util.web as web_util
             import json
             import os.path
+
             ps = self.pypi.split("/")[0]
             api_url = f"https://pypi.org/pypi/{ps}/json"
             request = urllib.request.Request(
@@ -217,17 +220,26 @@ for module in sys.argv[1:]:
                 if data and data.startswith(b"{"):
                     tty.debug(f"found entry for {ps} in pypi api")
                     unpacked = json.loads(data)
-                    if str(version) in unpacked["releases"]:
-                        tty.debug(f"found version {version} for {ps} in pypi api")
-                        ve = unpacked["releases"][str(version)]
-                        sdi = 1
-                        for i in range(len(ve)):
-                            if ve[i]["packagetype"] == "sdist":
-                                sdi = i
-                        tty.debug(f'returning {ve[sdi]["url"]}')
-                        return ve[sdi]["url"]
+                    return unpacked
+
         return None
- 
+
+
+    def url_for_version(self, version):
+        pypi_info = self._get_pypi_info()
+        if pypi_info:
+            if str(version) in pypi_info["releases"]:
+                tty.debug(f"found version {version} in pypi info")
+                ve = pypi_info["releases"][str(version)]
+                sdi = 1
+                for i in range(len(ve)):
+                    if ve[i]["packagetype"] == "sdist":
+                        sdi = i
+                tty.debug(f'returning {ve[sdi]["url"]}')
+                return ve[sdi]["url"]
+        return None
+
+
 def _homepage(cls: "PythonPackage") -> Optional[str]:
     """Get the homepage from PyPI if available."""
     if cls.pypi:
