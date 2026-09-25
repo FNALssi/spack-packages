@@ -204,11 +204,11 @@ for module in sys.argv[1:]:
 
     @lru_cache(maxsize=32)
     def _get_pypi_info(self):
+        """ check pypi.org json api and return data """
         if self.pypi:
             import urllib
             import spack.util.web as web_util
             import json
-            import os.path
 
             ps = self.pypi.split("/")[0]
             api_url = f"https://pypi.org/pypi/{ps}/json"
@@ -226,6 +226,7 @@ for module in sys.argv[1:]:
 
 
     def url_for_version(self, version):
+        """ if we can find the url on pypi, return it. """
         pypi_info = self._get_pypi_info()
         if pypi_info:
             if str(version) in pypi_info["releases"]:
