@@ -216,12 +216,15 @@ for module in sys.argv[1:]:
             request = urllib.request.Request(
                 api_url, headers={"User-Agent": web_util.SPACK_USER_AGENT, "Accept": "*/*"}
             )
-            with web_util.urlopen(request) as response:
-                data = response.read()
-                if data and data.startswith(b"{"):
-                    tty.debug(f"found entry for {ps} in pypi api")
-                    unpacked = json.loads(data)
-                    return unpacked
+            try:
+                with web_util.urlopen(request) as response:
+                    data = response.read()
+                    if data and data.startswith(b"{"):
+                        tty.debug(f"found entry for {ps} in pypi api")
+                        unpacked = json.loads(data)
+                        return unpacked
+            except web_util.DetailedHTTPError:
+                pass
 
         return None
 
