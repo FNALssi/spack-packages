@@ -201,7 +201,33 @@ for module in sys.argv[1:]:
                 *self.import_modules,
             )
 
-
+    def url_for_version(self, version):
+        if self.pypi: 
+            import urllib
+            import spack.util.web as web_util
+            import json
+            import os.path
+            ps = self.pypi.split("/")[0]
+            api_url = f"https://pypi.org/pypi/{ps}/json"
+            request = urllib.request.Request(
+                api_url, headers={"User-Agent": web_util.SPACK_USER_AGENT, "Accept": "*/*"}
+            )
+            with web_util.urlopen(request) as response:
+                data = response.read()
+                if data and data.startswith(b"{"):
+                    tty.debug(f"found entry for {ps} in pypi api")
+                    unpacked = json.loads(data)
+                    if str(version) in unpacked["releases"]:
+                        tty.debug(f"found version {version} for {ps} in pypi api")
+                        ve = unpacked["releases"][str(version)]
+                        sdi = 1
+                        for i in range(len(ve)):
+                            if ve[i]["packagetype"] == "sdist":
+                                sdi = i
+                        tty.debug(f'returning {ve[sdi]["url"]}')
+                        return ve[sdi]["url"]
+        return None
+ 
 def _homepage(cls: "PythonPackage") -> Optional[str]:
     """Get the homepage from PyPI if available."""
     if cls.pypi:
