@@ -203,6 +203,16 @@ def _homepage(cls: "PythonPackage") -> Optional[str]:
     return None
 
 
+def _urls(cls: "PythonPackage") -> Optional[str]:
+    if cls.pypi and not hasattr(cls, 'url'):
+        # handle both older mixed case and recent lowercased package urls
+        url = _url(cls)
+        urls = [url.lower().replace("-","_"), url]
+        # tty.debug("_urls: returning {urls=}")
+        return urls
+    return []
+
+
 def _url(cls: "PythonPackage") -> Optional[str]:
     if cls.pypi:
         return f"https://files.pythonhosted.org/packages/source/{cls.pypi[0]}/{cls.pypi}"
@@ -242,7 +252,8 @@ class PythonPackage(PythonExtension):
         depends_on("py-wheel", type="build")
 
     homepage: ClassProperty[Optional[str]] = classproperty(_homepage)
-    url: ClassProperty[Optional[str]] = classproperty(_url)
+    urls: ClassProperty[Optional[List[str]]] = classproperty(_urls)
+
     list_url: ClassProperty[Optional[str]] = classproperty(_list_url)
 
     @property

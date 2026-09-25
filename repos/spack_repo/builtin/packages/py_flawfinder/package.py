@@ -8,7 +8,7 @@ from spack_repo.builtin.build_systems.sourceforge import SourceforgePackage
 from spack.package import *
 
 
-class PyFlawfinder(PythonPackage, SourceforgePackage):
+class PyFlawfinder(SourceforgePackage, PythonPackage):
     """a program that examines source code looking for security weaknesses"""
 
     homepage = "https://dwheeler.com/flawfinder/"
