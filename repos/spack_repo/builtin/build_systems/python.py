@@ -238,7 +238,7 @@ for module in sys.argv[1:]:
                 for i in range(len(ve)):
                     if ve[i]["packagetype"] == "sdist":
                         sdi = i
-                        tty.debug(f'returning {ve[sdi]["url"]}')
+                        ty.debug(f"returning {ve[sdi]['url']}")
                         return ve[sdi]["url"]
         return None
 
