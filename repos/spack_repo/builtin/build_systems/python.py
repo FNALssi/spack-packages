@@ -2,10 +2,13 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
+import json
 import os
 import re
 import shutil
 import stat
+import urllib
+
 from functools import lru_cache
 from typing import Dict, Iterable, List, Mapping, Optional, Tuple
 
@@ -37,6 +40,7 @@ from spack.package import (
     when,
     working_dir,
 )
+import spack.util.web as web_util
 
 
 def _flatten_dict(dictionary: Mapping[str, object]) -> Iterable[str]:
@@ -206,10 +210,6 @@ for module in sys.argv[1:]:
     def _get_pypi_info(self):
         """check pypi.org json api and return data"""
         if hasattr(self, "pypi") and self.pypi:
-            import json
-            import urllib
-
-            import spack.util.web as web_util
 
             ps = self.pypi.split("/")[0]
             api_url = f"https://pypi.org/pypi/{ps}/json"
