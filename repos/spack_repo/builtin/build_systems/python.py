@@ -272,19 +272,6 @@ def _homepage(cls: "PythonPackage") -> Optional[str]:
     return None
 
 
-def _url(cls: "PythonPackage") -> Optional[str]:
-    if cls.pypi:
-        return f"https://files.pythonhosted.org/packages/source/{cls.pypi[0]}/{cls.pypi}"
-    return None
-
-
-def _list_url(cls: "PythonPackage") -> Optional[str]:
-    if cls.pypi:
-        name = cls.pypi.split("/")[0]
-        return f"https://pypi.org/simple/{name}/"
-    return None
-
-
 class PythonPackage(PythonExtension):
     """Specialized class for packages that are built using pip."""
 
@@ -311,8 +298,6 @@ class PythonPackage(PythonExtension):
         depends_on("py-wheel", type="build")
 
     homepage: ClassProperty[Optional[str]] = classproperty(_homepage)
-    url: ClassProperty[Optional[str]] = classproperty(_url)
-    list_url: ClassProperty[Optional[str]] = classproperty(_list_url)
 
     @property
     def python_spec(self) -> Spec:
