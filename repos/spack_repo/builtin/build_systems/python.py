@@ -40,6 +40,7 @@ from spack.package import (
     when,
     working_dir,
 )
+from spack.version import StandardVersion
 
 
 def _flatten_dict(dictionary: Mapping[str, object]) -> Iterable[str]:
@@ -246,12 +247,28 @@ for module in sys.argv[1:]:
                         return ve[sdi]["url"]
         return None
 
+    def fetch_remote_versions(
+        self, concurrency: Optional[int] = None
+    ) -> Dict[StandardVersion, str]:
+        """if we can find the url on pypi, return it."""
+        pypi_info = self._get_pypi_info()
+        if pypi_info:
+            res = {}
+            for ver in pypi_info["releases"]:
+                res[StandardVersion.from_string(ver)] = self.url_for_version(ver)
+            return res
+        return super().fetch_remote_versions(concurrency)
+
 
 def _homepage(cls: "PythonPackage") -> Optional[str]:
     """Get the homepage from PyPI if available."""
     if cls.pypi:
-        name = cls.pypi.split("/")[0]
-        return f"https://pypi.org/project/{name}/"
+        pypi_info = cls._get_pypi_info()
+        if pypi_info and "home_page" in pypi_info:
+            return pypi_info["home_page"]
+        else:
+            name = cls.pypi.split("/")[0]
+            return f"https://pypi.org/project/{name}/"
     return None
 
 
