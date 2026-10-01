@@ -12,6 +12,7 @@ from functools import lru_cache
 from typing import Dict, Iterable, List, Mapping, Optional, Tuple
 
 import spack.util.web as web_util
+from spack.error import NoURLError
 from spack.package import (
     BuilderWithDefaults,
     ClassProperty,
@@ -257,13 +258,16 @@ for module in sys.argv[1:]:
             for ver in pypi_info["releases"]:
                 res[StandardVersion.from_string(ver)] = self.url_for_version(ver)
             return res
-        return super().fetch_remote_versions(concurrency)
+        try:
+            return super().fetch_remote_versions(concurrency)
+        except NoURLError:
+            return []
 
 
 def _homepage(cls: "PythonPackage") -> Optional[str]:
     """Get the homepage from PyPI if available."""
     if cls.pypi:
-        pypi_info = cls._get_pypi_info()
+        pypi_info = cls._get_pypi_info(cls)
         if pypi_info and "home_page" in pypi_info:
             return pypi_info["home_page"]
         else:
