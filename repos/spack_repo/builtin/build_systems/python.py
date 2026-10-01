@@ -223,7 +223,7 @@ for module in sys.argv[1:]:
                         tty.debug(f"found entry for {ps} in pypi api")
                         return unpacked
             except web_util.DetailedHTTPError:
-                pass
+                tty.warn(f"Unable to fetch PyPi json information for {ps}")
 
         return None
 
