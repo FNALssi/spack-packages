@@ -12,7 +12,6 @@ from functools import lru_cache
 from typing import Dict, Iterable, List, Mapping, Optional, Tuple
 
 import spack.util.web as web_util
-from spack.error import NoURLError
 from spack.package import (
     BuilderWithDefaults,
     ClassProperty,
@@ -258,10 +257,7 @@ for module in sys.argv[1:]:
             for ver in pypi_info["releases"]:
                 res[StandardVersion.from_string(ver)] = self.url_for_version(ver)
             return res
-        try:
-            return super().fetch_remote_versions(concurrency)
-        except NoURLError:
-            return []
+        return super().fetch_remote_versions(concurrency)
 
 
 def _homepage(cls: "PythonPackage") -> Optional[str]:
@@ -273,6 +269,19 @@ def _homepage(cls: "PythonPackage") -> Optional[str]:
         else:
             name = cls.pypi.split("/")[0]
             return f"https://pypi.org/project/{name}/"
+    return None
+
+
+def _url(cls: "PythonPackage") -> Optional[str]:
+    if cls.pypi:
+        return f"https://files.pythonhosted.org/packages/source/{cls.pypi[0]}/{cls.pypi}"
+    return None
+
+
+def _list_url(cls: "PythonPackage") -> Optional[str]:
+    if cls.pypi:
+        name = cls.pypi.split("/")[0]
+        return f"https://pypi.org/simple/{name}/"
     return None
 
 
@@ -302,6 +311,8 @@ class PythonPackage(PythonExtension):
         depends_on("py-wheel", type="build")
 
     homepage: ClassProperty[Optional[str]] = classproperty(_homepage)
+    url: ClassProperty[Optional[str]] = classproperty(_url)
+    list_url: ClassProperty[Optional[str]] = classproperty(_list_url)
 
     @property
     def python_spec(self) -> Spec:
