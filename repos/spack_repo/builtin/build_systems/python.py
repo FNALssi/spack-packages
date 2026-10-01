@@ -218,8 +218,8 @@ for module in sys.argv[1:]:
                 with web_util.urlopen(request) as response:
                     data = response.read()
                     if data and data.startswith(b"{"):
-                        tty.debug(f"found entry for {ps} in pypi api")
                         unpacked = json.loads(data)
+                        tty.debug(f"found entry for {ps} in pypi api")
                         return unpacked
             except web_util.DetailedHTTPError:
                 pass
@@ -229,12 +229,19 @@ for module in sys.argv[1:]:
     def url_for_version(self, version):
         """if we can find the url on pypi, return it."""
         pypi_info = self._get_pypi_info()
+
         if pypi_info:
+
+            if self.pypi.endswith(".whl"):
+                pkgtype = "bdist_wheel"
+            else:
+                pkgtype = "sdist"
+
             if str(version) in pypi_info["releases"]:
                 tty.debug(f"found version {version} in pypi info")
                 ve = pypi_info["releases"][str(version)]
                 for i in range(len(ve)):
-                    if ve[i]["packagetype"] == "sdist":
+                    if ve[i]["packagetype"] == pkgtype:
                         sdi = i
                         tty.debug(f"returning {ve[sdi]['url']}")
                         return ve[sdi]["url"]
