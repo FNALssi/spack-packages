@@ -231,7 +231,6 @@ for module in sys.argv[1:]:
         pypi_info = self._get_pypi_info()
 
         if pypi_info:
-
             if self.pypi.endswith(".whl"):
                 pkgtype = "bdist_wheel"
             else:
