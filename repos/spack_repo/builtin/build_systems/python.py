@@ -267,7 +267,7 @@ for module in sys.argv[1:]:
 def _homepage(cls: "PythonPackage") -> Optional[str]:
     """Get the homepage from PyPI if available."""
     if cls.pypi:
-        pypi_info = cls._get_pypi_info(cls)
+        pypi_info = cls._get_pypi_info()
         if pypi_info and "home_page" in pypi_info:
             return pypi_info["home_page"]
         else:
