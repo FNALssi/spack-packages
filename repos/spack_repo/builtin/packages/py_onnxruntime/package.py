@@ -50,10 +50,14 @@ class PyOnnxruntime(CMakePackage, PythonExtension, ROCmPackage, CudaPackage):
     depends_on("cmake@3.26:", when="@1.17:", type="build")
     depends_on("cmake@3.1:", type="build")
 
-    depends_on("abseil-cpp@20240722.0: cxxstd=17", when="@1.20:")
-    # Needs absl/strings/has_absl_stringify.h
-    # cxxstd=20 may also work, but cxxstd=14 does not
-    depends_on("abseil-cpp@20240116.0: cxxstd=17", when="@1.17:1.19.2")
+    with when("@1.17:"):
+        # Needs absl/strings/has_absl_stringify.h
+        # cxxstd=20 may also work, but cxxstd=14 does not
+        depends_on("abseil-cpp@20240116.0: cxxstd=17")
+        depends_on("abseil-cpp@20240722.0:", when="@1.20:")
+
+        # abseil 20250814+ lacks absl::low_level_hash: https://github.com/microsoft/onnxruntime/issues/25815
+        depends_on("abseil-cpp@:20250512")
 
     extends("python")
     depends_on("python", type=("build", "run"))
@@ -153,6 +157,14 @@ class PyOnnxruntime(CMakePackage, PythonExtension, ROCmPackage, CudaPackage):
     # https://github.com/microsoft/onnxruntime/pull/25200
     patch("pr25200-fix-linker-flags.patch", when="@1.21:1.22")
 
+    # optimizer_api.h uses uint8_t/int32_t without including <cstdint>, which
+    # newer libstdc++ no longer provides transitively
+    patch(
+        "https://github.com/microsoft/onnxruntime/commit/f7619dc93f592ddfc10f12f7145f9781299163a0.patch?full_index=1",
+        sha256="c0d1112d5ad4bae4260c0b1b13eb1397d87fdcec8c21c02467f31e6e0db1b906",
+        when="@1.17:1.22",
+    )
+
     dynamic_cpu_arch_values = ("NOAVX", "AVX", "AVX2", "AVX512")
 
     variant(
@@ -202,6 +214,7 @@ class PyOnnxruntime(CMakePackage, PythonExtension, ROCmPackage, CudaPackage):
         args = [
             define("onnxruntime_ENABLE_PYTHON", True),
             define("onnxruntime_BUILD_SHARED_LIB", True),
+            define("onnxruntime_BUILD_UNIT_TESTS", self.run_tests),
             define_from_variant("onnxruntime_USE_CUDA", "cuda"),
             define("onnxruntime_BUILD_CSHARP", False),
             define("onnxruntime_USE_TVM", False),
@@ -234,6 +247,12 @@ class PyOnnxruntime(CMakePackage, PythonExtension, ROCmPackage, CudaPackage):
                     define("onnxruntime_ROCM_VERSION", self.spec["hip"].version),
                     define("onnxruntime_USE_COMPOSABLE_KERNEL", "OFF"),
                 )
+            )
+
+        if self.spec.satisfies("platform=darwin"):
+            # avoid onnxruntime's vendored protoc
+            args.append(
+                define("ONNX_CUSTOM_PROTOC_EXECUTABLE", self.spec["protobuf"].prefix.bin.protoc)
             )
         return args
 

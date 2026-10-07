@@ -48,6 +48,7 @@ class Libceed(MakefilePackage, CudaPackage, ROCmPackage):
     depends_on("c", type="build")  # generated
     depends_on("cxx", type="build")  # generated
     depends_on("fortran", type="build")  # generated
+    depends_on("pkgconf", type="build")
 
     with when("+rocm"):
         depends_on("hip@3.8.0:", when="@0.8:")
@@ -127,7 +128,17 @@ class Libceed(MakefilePackage, CudaPackage, ROCmPackage):
         if spec.satisfies("@0.4:"):
             if spec.satisfies("+cuda"):
                 makeopts += ["CUDA_DIR=%s" % spec["cuda"].prefix]
-                makeopts += ["CUDA_ARCH=sm_%s" % spec.variants["cuda_arch"].value]
+                cuda_arch = spec.variants["cuda_arch"].value
+                if "none" not in cuda_arch:
+                    if spec.satisfies("@develop"):
+                        cuda_targets = " ".join("sm_%s" % arch for arch in cuda_arch)
+                        makeopts += ["CUDA_TARGETS=%s" % cuda_targets]
+                    else:
+                        if len(cuda_arch) != 1:
+                            raise InstallError(
+                                "multiple CUDA architectures require libceed@develop"
+                            )
+                        makeopts += ["CUDA_ARCH=sm_%s" % cuda_arch[0]]
                 if spec.satisfies("@:0.4"):
                     nvccflags = [
                         '-ccbin %s -Xcompiler "%s" -Xcompiler %s'

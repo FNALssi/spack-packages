@@ -13,17 +13,19 @@ class Pandorapfa(Package):
     NOTE: this recipe is not used to install  other pandora packages, for which
     separate recipes exist. It only installs the cmakemodules directory."""
 
-    url = "https://github.com/PandoraPFA/PandoraPFA/archive/v03-14-00.tar.gz"
-    homepage = "https://github.com/PandoraPFA/PandoraPFA"
-    git = "https://github.com/PandoraPFA/PandoraPFA.git"
+    url = "https://github.com/PandoraPFAOrg/PandoraPFA/archive/v03-14-00.tar.gz"
+    homepage = "https://github.com/PandoraPFAOrg/PandoraPFA"
+    git = "https://github.com/PandoraPFAOrg/PandoraPFA.git"
 
     tags = ["hep"]
 
     maintainers("jmcarcell", "wdconinc")
 
     version("master", branch="master")
+    version("5.3.0", sha256="87d5af118cff21ced26ad5338da5ce09ce55e0795d3fe8beb30c7e6ae81245d6")
     version("5.1.0", sha256="458dbbe227766746ed2cc10ea142cea4682c8e176f9cd57b16afd84efa39d1da")
     version("5.0.0", sha256="e9da3afacad52f29dc2170adad8065cde109ff1a5b3755a93a41e7448e1d7b42")
+    version("4.20.0", sha256="a04ac3c5519ae12ad91f19641ebf8e58bf978d510c199044597a1a624e6ce4c9")
     version("4.19.3", sha256="18d36a33f150ebfe7ffbc3521a86b50c470040d87b9267f126234ebf7c5de983")
     version("4.17.5", sha256="740818e9162ba9f795906315029a2f066d55651855672d200cbd8c36acb8d86b")
     version("4.17.4", sha256="c8c35258cb447372ddb17b8647b4a7ce912e74ee9b0cbad470daadf669888393")
@@ -62,6 +64,10 @@ class Pandorapfa(Package):
     def url_for_version(self, version):
         # contrary to iLCSoft packages, here the patch version is kept when 0
         base_url = self.url[: self.url.rfind("/")]
+
+        if version.isdevelop():
+            return f"{base_url}/refs/heads/{version}.tar.gz"
+
         major = str(version[0]).zfill(2)
         minor = str(version[1]).zfill(2)
         patch = str(version[2]).zfill(2)

@@ -14,9 +14,9 @@ class Openglu(Package):
     homepage = "https://www.opengl.org/resources/libraries"
 
     provides("glu@:1.3", when="@1.3:")
-    provides("glu@:1.2", when="@1.2:")
-    provides("glu@:1.1", when="@1.1:")
-    provides("glu@:1.0", when="@1.0:")
+    provides("glu@:1.2", when="@1.2")
+    provides("glu@:1.1", when="@1.1")
+    provides("glu@:1.0", when="@1.0")
 
     # Override the fetcher method to throw a useful error message;
     # fixes an issue similar to Github issue (#7061), in which the
@@ -63,6 +63,11 @@ class Openglu(Package):
     @fetcher.setter  # Since fetcher is read-write, must override both
     def fetcher(self):
         _ = self.fetcher
+
+    def setup_dependent_build_environment(
+        self, env: EnvironmentModifications, dependent_spec: Spec
+    ):
+        env.prepend_path("OpenGL_ROOT", self.prefix)
 
     @property
     def libs(self):

@@ -84,6 +84,7 @@ class Xyce(CMakePackage):
     depends_on("fftw~mpi", type=("build", "run"), when="+fftw~mpi")
     depends_on("fftw+mpi", type=("build", "run"), when="+fftw+mpi")
 
+    variant("verbose", default=False, description="Increase Xyce verbosity")
     # https://github.com/Xyce/Xyce/commit/ddec31a9c42c683831937be17fd6ffc3180e77a1
     # requirement because of use of std::filesystem
     conflicts("@7.10:", when="%gcc@:8")
@@ -103,7 +104,7 @@ class Xyce(CMakePackage):
     depends_on("trilinos+isorropia+zoltan", when="+mpi")
 
     # Currently supported versions of Xyce
-    depends_on("trilinos@15.0.0:develop", when="@7.8.0:")
+    depends_on("trilinos@15:16", when="@7.8.0:")
     depends_on("trilinos+rol", when="@7.7.0:")
 
     # tested versions of Trilinos against older versions of Xyce
@@ -113,13 +114,8 @@ class Xyce(CMakePackage):
     depends_on("trilinos@13.2.0:", when="+pymi")
 
     # Propagate variants to trilinos:
-    for _variant in ("mpi",):
-        depends_on("trilinos~" + _variant, when="~" + _variant)
-        depends_on("trilinos+" + _variant, when="+" + _variant)
-
-    # The default settings for various Trilinos variants would require the
-    # installation of many more packages than are needed for Xyce.
-    depends_on("trilinos~anasazi~float~ifpack2~ml~muelu~zoltan2")
+    depends_on("trilinos~mpi", when="~mpi")
+    depends_on("trilinos+mpi", when="+mpi")
 
     # Issue #1712 forces explicitly enumerating blas packages to propagate variants
     with when("+pymi_static_tpls"):
@@ -155,6 +151,7 @@ class Xyce(CMakePackage):
     patch(
         "454-cmake-xyce.patch",
         sha256="4d47cd1f10607205e64910ac124c6dd329f1ecbf861416e9da24a1736f2149ff",
+        when="@:7.10",
     )
 
     def cmake_args(self):
@@ -162,7 +159,7 @@ class Xyce(CMakePackage):
 
         options = []
 
-        if "+mpi" in spec:
+        if spec.satisfies("+mpi"):
             options.append(self.define("CMAKE_CXX_COMPILER", spec["mpi"].mpicxx))
             options.append(self.define("CMAKE_C_COMPILER", spec["mpi"].mpicc))
         else:
@@ -175,13 +172,20 @@ class Xyce(CMakePackage):
         options.append(self.define_from_variant("Xyce_PLUGIN_SUPPORT", "plugin"))
         options.append(self.define("Trilinos_DIR", spec["trilinos"].prefix))
 
-        if "+pymi" in spec:
+        if spec.satisfies("+pymi"):
             pybind11 = spec["py-pybind11"]
             python = spec["python"]
             options.append("-DXyce_PYMI:BOOL=ON")
-            options.append("-Dpybind11_DIR:PATH={0}".format(pybind11.prefix))
-            options.append("-DPython_ROOT_DIR:FILEPATH={0}".format(python.prefix))
+            options.append(f"-Dpybind11_DIR:PATH={pybind11.prefix}")
+            options.append(f"-DPython_ROOT_DIR:FILEPATH={python.prefix}")
             options.append("-DPython_FIND_STRATEGY=LOCATION")
+        if spec.satisfies("+verbose"):
+            options.append("-DXyce_VERBOSE_LINEAR=ON")
+            options.append("-DXyce_VERBOSE_NONLINEAR=ON")
+            options.append("-DXyce_VERBOSE_TIME=ON")
+        if spec.satisfies("+fftw"):
+            options.append("-DXyce_USE_FFTW=ON")
+            options.append(f"-DFFTW_ROOT:PATH={spec['fftw'].prefix}")
 
         return options
 
@@ -202,6 +206,6 @@ class Xyce(CMakePackage):
                     libgfortran = fc("--print-file-name", "libgfortran.a", output=str).strip()
                 # -L<libdir> -lgfortran required for OSX
                 # https://github.com/spack/spack/pull/25823#issuecomment-917231118
-                flags.append("-L{0} -lgfortran".format(os.path.dirname(libgfortran)))
+                flags.append(f"-L{os.path.dirname(libgfortran)} -lgfortran")
 
         return (flags, None, None)

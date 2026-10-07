@@ -12,9 +12,9 @@ class Pandoramonitoring(CMakePackage):
     """ROOT-based Event Visualisation Environment for Pandora with
     tree-writing functionality"""
 
-    url = "https://github.com/PandoraPFA/PandoraMonitoring/archive/v03-04-00.tar.gz"
-    homepage = "https://github.com/PandoraPFA/PandoraMonitoring"
-    git = "https://github.com/PandoraPFA/PandoraMonitoring.git"
+    url = "https://github.com/PandoraPFAOrg/PandoraMonitoring/archive/v03-04-00.tar.gz"
+    homepage = "https://github.com/PandoraPFAOrg/PandoraMonitoring"
+    git = "https://github.com/PandoraPFAOrg/PandoraMonitoring.git"
 
     tags = ["hep"]
 
@@ -29,14 +29,15 @@ class Pandoramonitoring(CMakePackage):
     version("3.6.0", sha256="5fc9574faa3e90d96e5d2a27dea46b55f844499cf21e39060acb1e4c080dec77")
     version("3.5.0", sha256="274562abb7c797194634d5460a56227444a1de07a240c88ae35ca806abcbaf60")
 
-    depends_on("c", type="build")
+    depends_on("c", type="build", when="@:4")
     depends_on("cxx", type="build")
+    depends_on("cmake@3.20:", type="build", when="@5:")
 
     depends_on("root@6.18.04: +geom +opengl +x")
     depends_on("pandorasdk")
     depends_on("pandorasdk@4:", when="@4:")
 
-    # https://github.com/PandoraPFA/PandoraMonitoring/pull/13
+    # https://github.com/PandoraPFAOrg/PandoraMonitoring/pull/13
     @when("@:3.6.0")
     def patch(self):
         filter_file(

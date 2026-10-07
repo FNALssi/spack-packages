@@ -5,26 +5,35 @@
 import re
 
 from spack_repo.builtin.build_systems.cmake import CMakePackage
-from spack_repo.builtin.build_systems.rocm import ROCmPackage
+from spack_repo.builtin.build_systems.rocm import ROCmLibrary, ROCmPackage
 
 from spack.package import *
 
 
-class RoctracerDev(CMakePackage, ROCmPackage):
+class RoctracerDev(ROCmLibrary, CMakePackage, ROCmPackage):
     """ROC-tracer library: Runtimes Generic Callback/Activity APIs.
     The goal of the implementation is to provide a generic independent from
     specific runtime profiler to trace API and asyncronous activity."""
 
     homepage = "https://github.com/ROCm/roctracer"
-    git = "https://github.com/ROCm/roctracer.git"
-    url = "https://github.com/ROCm/roctracer/archive/rocm-6.4.3.tar.gz"
-    tags = ["rocm"]
+    git = "https://github.com/ROCm/rocm-systems.git"
 
+    tags = ["rocm"]
     maintainers("srekolam", "renjithravindrankannath", "afzpatel")
     libraries = ["libroctracer64"]
-
     license("MIT")
 
+    rocm_url_map = [
+        ("7.1.1", "https://github.com/ROCm/roctracer/archive/rocm-{0}.tar.gz"),
+        ("7.2.3", "https://github.com/ROCm/rocm-systems/archive/rocm-{0}.tar.gz"),
+        (None, "https://github.com/ROCm/rocm-systems/archive/refs/tags/therock-{1}.{2}.tar.gz"),
+    ]
+    version("10.0.0", sha256="f30517ed6d9e18cde104eb487f173e62fed0175083a9498ca383f8136a9f4eec")
+    version("7.14.0", sha256="8cadf0d5c0f53f334b7b940a78619d1746c913b26ae719e2a09e20a6f7128330")
+    version("7.13.0", sha256="86162d975c59c2f43eb79187378a9b10615db5c1d73441e7e0b7621a7ef8962c")
+    version("7.2.3", sha256="e90cfd8694af28a56433c8827a581ee12a4ba835f0d952436741d9e0f3f8685b")
+    version("7.2.1", sha256="201f19174eafbace2f7abf0d1178ebb17db878191276aba6d23f0e1758b0e10f")
+    version("7.2.0", sha256="728ea7e9bf16e6ed217a0fd1a8c9afaba2dae2e7908fa4e27201e67c803c5638")
     version("7.1.1", sha256="dec80803c6d2d684759172145177849efda65672645b95a2f2ad1a84335043bb")
     version("7.1.0", sha256="a90077e2080531803dac154e64d6d481289a5839493ce131c4edc8b5ac1bc294")
     version("7.0.2", sha256="c9dc54fc8b68a7598b3e9453f7962a87cb02e86d64e5681452ebafd62fb85e96")
@@ -94,11 +103,17 @@ class RoctracerDev(CMakePackage, ROCmPackage):
         "7.0.2",
         "7.1.0",
         "7.1.1",
+        "7.2.0",
+        "7.2.1",
+        "7.2.3",
+        "7.13.0",
+        "7.14.0",
+        "10.0.0",
     ]:
         depends_on(f"rocm-core@{ver}", when=f"@{ver}")
         depends_on(f"hsa-rocr-dev@{ver}", when=f"@{ver}")
         depends_on(f"rocminfo@{ver}", when=f"@{ver}")
-        depends_on(f"hip@{ver}", when=f"@{ver}")
+        depends_on(f"hip@{ver} +rocm", when=f"@{ver}")
         depends_on(f"llvm-amdgpu@{ver}", when=f"@{ver}")
 
     @classmethod
@@ -127,6 +142,13 @@ class RoctracerDev(CMakePackage, ROCmPackage):
         if self.spec.satisfies("@6.2:"):
             args.append(self.define("Clang_DIR", self.spec["llvm-amdgpu"].prefix.lib.cmake.clang))
         return args
+
+    @property
+    def root_cmakelists_dir(self):
+        if self.spec.satisfies("@7.2:"):
+            return "projects/roctracer"
+        else:
+            return "."
 
     @run_after("install")
     def post_install(self):

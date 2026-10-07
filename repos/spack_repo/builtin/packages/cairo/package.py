@@ -109,7 +109,8 @@ class Cairo(AutotoolsPackage, MesonPackage):
 
     depends_on("freetype", when="+ft")
     depends_on("libpng", when="+png")
-    depends_on("glib")
+    depends_on("glib", when="+gobject")
+    depends_on("pixman@0.30.0:")
     depends_on("pixman@0.36.0:", when="@1.17.2:")
     depends_on("fontconfig@2.10.91:", when="+fc")
 
@@ -143,7 +144,13 @@ class Cairo(AutotoolsPackage, MesonPackage):
     # patch from https://gitlab.freedesktop.org/cairo/cairo/issues/346
     patch("fontconfig.patch", when="@1.16.0:1.17.2")
     # Don't regenerate docs to avoid a dependency on gtk-doc
-    patch("disable-gtk-docs.patch", when="build_system=autotools ^autoconf@2.70:")
+    patch("disable-gtk-docs.patch", when="build_system=autotools")
+
+    def flag_handler(self, name, flags):
+        # gcc@15: defaults to -std=gnu23, causing errors with "typedef int bool;"
+        if name == "cflags" and self.spec.satisfies("build_system=autotools %gcc@15:"):
+            flags.append("-std=gnu17")
+        return (flags, None, None)
 
 
 class MesonBuilder(meson.MesonBuilder):
@@ -171,6 +178,9 @@ class MesonBuilder(meson.MesonBuilder):
             self.enable_or_disable("glib", variant="gobject"),
             "-Dspectre=disabled",
             "-Dsymbol-lookup=disabled",
+            # test/ and perf/ are never installed, and perf/meson.build probes for a
+            # system gtk+-2.0 regardless of -Dgtk2-utils, which fails to link when ~X
+            "-Dtests=disabled",
         ]
         return args
 
@@ -179,7 +189,7 @@ class AutotoolsBuilder(autotools.AutotoolsBuilder):
     def autoreconf(self, pkg, spec, prefix):
         # Regenerate, directing the script *not* to call configure before Spack
         # does
-        which("sh")("./autogen.sh", extra_env={"NOCONFIGURE": "1"})
+        which("sh", required=True)("./autogen.sh", extra_env={"NOCONFIGURE": "1"})
 
     def configure_args(self):
         args = ["--disable-trace", "--enable-tee"]  # can cause problems with libiberty
@@ -197,7 +207,7 @@ class AutotoolsBuilder(autotools.AutotoolsBuilder):
         args.extend(self.with_or_without("pic"))
 
         if self.spec.satisfies("+ft ^freetype~shared"):
-            pkgconf = which("pkg-config")
+            pkgconf = which("pkg-config", required=True)
             ldflags = pkgconf("--libs-only-L", "--static", "freetype2", output=str)
             libs = pkgconf("--libs-only-l", "--static", "freetype2", output=str)
             args.append(f"LDFLAGS={ldflags}")

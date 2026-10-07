@@ -36,6 +36,9 @@ class Dd4hep(CMakePackage):
     license("LGPL-3.0-or-later")
 
     version("master", branch="master")
+    version("1.38", sha256="8a11c42cfd2026faae421260bc3dea9f61c78ebacd1f9ba1b0ca3ff054425ffd")
+    version("1.37", sha256="ade63b28c13d8e265ef95185326bc311fdf76cd3afe1a2bc44c7ff3f6a19409c")
+    version("1.36", sha256="89c60c035fba04c94ee6ea68d4caecfe4c3c7edbb46aec9e613e6af9826fba2f")
     version("1.35", sha256="d15c6fbc762e8863a7c5b222a661baae8e9e30263554a9e5c24c593c1effd00b")
     version("1.34", sha256="1c121f4b3eb14d104b7a7f734e7e52efc4b6e4e5bc74d21d5d2de1b91c8f9f75")
     version("1.33", sha256="23f78163e1371a5f092758cdc60a18906b1b19bbeacdd7c68557ebf71424fc23")
@@ -98,6 +101,9 @@ class Dd4hep(CMakePackage):
     )
     variant("lcio", default=False, description="Enable build with lcio")
     variant("edm4hep", default=True, description="Enable build with edm4hep", when="@1.24:")
+    variant(
+        "g4hepem", default=False, description="Enable build of G4HepEm plugin", when="@1.38: +ddg4"
+    )
     variant("geant4units", default=False, description="Use geant4 units throughout")
     variant("tbb", default=False, description="Enable build with tbb")
     variant(
@@ -107,7 +113,7 @@ class Dd4hep(CMakePackage):
         " some places in addtion to the debug build type",
     )
 
-    _cxxstd_values = (conditional("14", when="@:1.34"), "17", "20")
+    _cxxstd_values = (conditional("14", when="@:1.34"), "17", "20", "23")
     variant(
         "cxxstd",
         default="20",
@@ -149,6 +155,7 @@ class Dd4hep(CMakePackage):
     depends_on("imagemagick", when="+doc")
     depends_on("xerces-c", when="+xercesc")
     depends_on("assimp@5.0.2:", when="+ddcad")
+    depends_on("g4hepem", when="+g4hepem")
     depends_on("hepmc3", when="+hepmc3")
     depends_on("hepmc3@3.2.6:", when="+hepmc3-gz")
     depends_on("bzip2", when="+hepmc3-gz")
@@ -208,6 +215,7 @@ class Dd4hep(CMakePackage):
             self.define_from_variant("DD4HEP_USE_EDM4HEP", "edm4hep"),
             self.define_from_variant("DD4HEP_USE_XERCESC", "xercesc"),
             self.define_from_variant("DD4HEP_USE_TBB", "tbb"),
+            self.define_from_variant("DD4HEP_USE_G4HEPEM", "g4hepem"),
             self.define_from_variant("DD4HEP_USE_GEANT4", "ddg4"),
             self.define_from_variant("DD4HEP_USE_LCIO", "lcio"),
             self.define_from_variant("DD4HEP_USE_HEPMC3", "hepmc3"),
@@ -262,6 +270,10 @@ class Dd4hep(CMakePackage):
         # the patch version is omitted when 0
         # so for example v01-12-01, v01-12 ...
         base_url = self.url.rsplit("/", 1)[0]
+
+        if version.isdevelop():
+            return f"{base_url}/refs/heads/{version}.tar.gz"
+
         if len(version) == 1:
             major = version[0]
             minor, patch = 0, 0

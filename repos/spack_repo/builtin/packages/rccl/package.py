@@ -18,11 +18,26 @@ class Rccl(CMakePackage):
 
     homepage = "https://github.com/ROCm/rccl"
     git = "https://github.com/ROCm/rccl.git"
-    url = "https://github.com/ROCm/rccl/archive/rocm-6.4.3.tar.gz"
     tags = ["rocm"]
 
     maintainers("srekolam", "renjithravindrankannath", "afzpatel")
     libraries = ["librccl"]
+
+    def url_for_version(self, version):
+        if version <= Version("7.2.3"):
+            url = "https://github.com/ROCm/rccl/archive/rocm-{0}.tar.gz"
+            return url.format(version)
+        else:
+            # For versions >= 7.13, use therock-{major}.{minor} tag format
+            url = "https://github.com/ROCm/rocm-systems/archive/refs/tags/therock-{0}.{1}.tar.gz"
+            return url.format(version[0], version[1])
+
+    version("10.0.0", sha256="f30517ed6d9e18cde104eb487f173e62fed0175083a9498ca383f8136a9f4eec")
+    version("7.14.0", sha256="8cadf0d5c0f53f334b7b940a78619d1746c913b26ae719e2a09e20a6f7128330")
+    version("7.13.0", sha256="86162d975c59c2f43eb79187378a9b10615db5c1d73441e7e0b7621a7ef8962c")
+    version("7.2.3", sha256="0cb83b3a0552d8b38b05c182753c68dd15432d99769da6aead889e30f14367d7")
+    version("7.2.1", sha256="a373bcfe03cf2243a97536860a81940998c36a0b324d9e10830e3cd2c3f8b523")
+    version("7.2.0", sha256="c884d730711e433b9df88af3cdf003eeeb3df6d98e93a09475f760a2aa017078")
     version("7.1.1", sha256="eaa60bcf62feb3198553f2bcf6dcbfdfcecd0fdfabda41f1dae7d3f15fadbd68")
     version("7.1.0", sha256="50ba486bc8a466a68bff9d6c9d7b3ebf8de9426906720fa44023b5390602b3b8")
     version("7.0.2", sha256="3e4363163f5de772707c8deea349a00744200733693c76a07ac842e55b6ad19e")
@@ -106,7 +121,10 @@ class Rccl(CMakePackage):
         when="@7.1",
     )
     # See https://github.com/ROCm/rocm-systems/pull/3231
-    patch("memory-3231.patch", when="@7.1:")
+    patch("memory-3231.patch", when="@7.1:7.2")
+
+    # https://github.com/ROCm/rocm-systems/pull/8704
+    patch("rocm-core-8704.patch", when="@7.14:")
 
     depends_on("c", type="build")
     depends_on("cxx", type="build")
@@ -137,6 +155,12 @@ class Rccl(CMakePackage):
         "7.0.2",
         "7.1.0",
         "7.1.1",
+        "7.2.0",
+        "7.2.1",
+        "7.2.3",
+        "7.13.0",
+        "7.14.0",
+        "10.0.0",
     ]:
         depends_on(f"rocm-cmake@{ver}:", type="build", when=f"@{ver}")
         depends_on(f"hip@{ver}", when=f"@{ver}")
@@ -145,11 +169,33 @@ class Rccl(CMakePackage):
         depends_on(f"rocm-smi-lib@{ver}", when=f"@{ver}")
         depends_on(f"rocm-core@{ver}", when=f"@{ver}")
 
-    for ver in ["6.4.0", "6.4.1", "6.4.2", "6.4.3", "7.0.0", "7.0.2", "7.1.0", "7.1.1"]:
+    for ver in [
+        "6.4.0",
+        "6.4.1",
+        "6.4.2",
+        "6.4.3",
+        "7.0.0",
+        "7.0.2",
+        "7.1.0",
+        "7.1.1",
+        "7.2.0",
+        "7.2.1",
+        "7.2.3",
+        "7.13.0",
+        "7.14.0",
+        "10.0.0",
+    ]:
         depends_on(f"roctracer-dev@{ver}", when=f"@{ver}")
         depends_on(f"rocprofiler-register@{ver}", when=f"@{ver}")
 
     depends_on("googletest@1.11.0:", type="test")
+
+    @property
+    def root_cmakelists_dir(self):
+        if self.spec.satisfies("@7.13:"):
+            return join_path(super().root_cmakelists_dir, "projects", "rccl")
+        else:
+            return super().root_cmakelists_dir
 
     @classmethod
     def determine_version(cls, lib):
@@ -194,11 +240,11 @@ class Rccl(CMakePackage):
             args.append(self.define("__skip_rocmclang", True))
         if self.spec.satisfies("@7.0"):
             args.append(self.define("EXPLICIT_ROCM_VERSION", self.version))
-        if self.spec.satisfies("@7.1"):
+        if self.spec.satisfies("@7.1:"):
             args.append(self.define("ROCMCORE_PATH", self.spec["rocm-core"].prefix))
         return args
 
     def test_unit(self):
         """Run unit tests"""
-        unit_tests = which(join_path(self.prefix.bin, "rccl-UnitTests"))
+        unit_tests = which(join_path(self.prefix.bin, "rccl-UnitTests"), required=True)
         unit_tests()

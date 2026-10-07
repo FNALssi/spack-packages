@@ -20,9 +20,17 @@ class PyNumpy(PythonPackage):
 
     maintainers("adamjstewart", "rgommers")
 
-    license("BSD-3-Clause")
+    license("BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0")
 
     version("main", branch="main")
+    version("2.5.3", sha256="df2d5874ff183595a4ba404edd04f6bd9b5505c1d7708573f6a6c17489a67563")
+    version("2.5.2", sha256="d482d171c406ae88c5b19cad3b6a1c4c5209f886ab74bc44c2c865c23f52d860")
+    version("2.5.1", sha256="a48a113e6afea91f5608793bafa7ef2ad481fefbda87ec5069f483de61cb9fa3")
+    version("2.5.0", sha256="5a129578019311b6e56bdd714250f19b518f7dceeeb8d1af5490f4942d3f891c")
+    version("2.4.6", sha256="f3a3570c4a2a16746ac2c31a7c7c7b0c186b95ce902e33db6f28094ed7387dda")
+    version("2.4.5", sha256="ca670567a5683b7c1670ec03e0ddd5862e10934e92a70751d68d7b7b74ca7f9f")
+    version("2.4.4", sha256="2d390634c5182175533585cc89f3608a4682ccb173cc9bb940b2881c8d6f8fa0")
+    version("2.4.3", sha256="483a201202b73495f00dbc83796c6ae63137a9bdade074f7648b3e32613412dd")
     version("2.4.2", sha256="659a6107e31a83c4e33f763942275fd278b21d095094044eb35569e86a21ddae")
     version("2.4.1", sha256="a1ceafc5042451a858231588a104093474c6a5c57dcc724841f5c888d237d690")
     version("2.4.0", sha256="6e504f7b16118198f138ef31ba24d985b124c2c469fe8467007cf30fd992f934")
@@ -90,7 +98,9 @@ class PyNumpy(PythonPackage):
 
     # Based on PyPI wheel availability
     with default_args(type=("build", "link", "run")):
-        depends_on("python@3.11:3.14", when="@2.3.2:")
+        depends_on("python@3.12:3.15", when="@2.5.2:")
+        depends_on("python@3.12:3.14", when="@2.5.0:2.5.1")
+        depends_on("python@3.11:3.14", when="@2.3.2:2.4")
         depends_on("python@3.11:3.13", when="@2.3.0:2.3.1")
         depends_on("python@3.10:3.13", when="@2.1:2.2")
         depends_on("python@3.9:3.12", when="@1.26:2.0")
@@ -107,6 +117,7 @@ class PyNumpy(PythonPackage):
         # Build dependencies (do not include upper bound unless known issues)
         depends_on("py-meson-python@0.18:", when="@2.4:")
         depends_on("py-meson-python@0.15:", when="@1.26.4:")
+        depends_on("py-cython@3.1.0:", when="@2.5.2:")
         depends_on("py-cython@3.0.6:", when="@2:")
         depends_on("py-cython@0.29.34:", when="@1.26:")
         depends_on("py-cython@0.29.34:2", when="@1.25")
@@ -127,7 +138,7 @@ class PyNumpy(PythonPackage):
     with default_args(type="build"):
         depends_on("py-pyproject-metadata@0.7.1:", when="@1.26.0:1.26.3")
         depends_on("py-tomli@1:", when="@1.26.0:1.26.3 ^python@:3.10")
-        depends_on("py-setuptools@60:", when="@1.26.0:1.26.3 ^python@3.12:")
+        depends_on("py-setuptools@60:67", when="@1.26.0:1.26.3 ^python@3.12:")
         depends_on("py-colorama", when="@1.26.0:1.26.3 platform=windows")
         depends_on("ninja@1.8.2:", when="@1.26.0:1.26.3")
         depends_on("pkgconfig", when="@1.26.0:1.26.3")
@@ -153,7 +164,7 @@ class PyNumpy(PythonPackage):
     # Add Fujitsu Fortran compiler
     patch("add_fj_compiler.patch", when="@1.19.3:1.19.5%fj")
 
-    patch("check_executables.patch", when="@1.20.0:")
+    patch("check_executables.patch", when="@1.20.0:2.4")
     patch("check_executables2.patch", when="@1.19.0:1.19.5")
 
     # Fix atomic_load const issue
@@ -195,10 +206,17 @@ class PyNumpy(PythonPackage):
 
     # meson.build
     # https://docs.scipy.org/doc/scipy/dev/toolchain.html#compilers
+    conflicts("%gcc@:10.2", when="@2.5.1:", msg="NumPy requires GCC >= 10.3")
     conflicts("%gcc@:9.2", when="@2.3:", msg="NumPy requires GCC >= 9.3")
     conflicts("%gcc@:8.3", when="@1.26:", msg="NumPy requires GCC >= 8.4")
     conflicts("%gcc@:6.4", when="@1.23:", msg="NumPy requires GCC >= 6.5")
     conflicts("%gcc@:4.7", msg="NumPy requires GCC >= 4.8")
+    conflicts(
+        "%msvc@:19.34",
+        when="@2.5:",
+        msg="NumPy requires at least vc142 (default with Visual Studio 2019) "
+        "when building with MSVC",
+    )
     conflicts(
         "%msvc@:19.19",
         when="@1.26:",
@@ -264,6 +282,14 @@ class PyNumpy(PythonPackage):
             if gcc_version <= Version("5.1"):
                 flags.append(self.compiler.c99_flag)
 
+        if self.spec.satisfies("@1.26 ^intel-oneapi-compilers@2025.2") and name in (
+            "cflags",
+            "cxxflags",
+            "fflags",
+        ):
+            flags = [flag for flag in flags if not flag.startswith("-O")]
+            flags.append("-O1")
+
         return (flags, None, None)
 
     def _blas_lapack_pkg_config_mkl(self, spec) -> str:
@@ -300,8 +326,17 @@ class PyNumpy(PythonPackage):
         if spec["lapack"].name in ["intel-mkl", "intel-parallel-studio", "intel-oneapi-mkl"]:
             lapack = self._blas_lapack_pkg_config_mkl(spec["lapack"])
 
-        if spec["blas"].name in ["blis", "amdblis"]:
+        if spec["blas"].name == "blis":
             blas = "blis"
+
+        # Handle AMD BLIS: use multithreaded pkg-config name for @5.1: when threading is enabled
+        if spec["blas"].name == "amdblis":
+            blas = "blis"
+            if spec["amdblis"].satisfies("@5.1:") and (
+                spec["amdblis"].satisfies("threads=openmp")
+                or spec["amdblis"].satisfies("threads=pthreads")
+            ):
+                blas = "blis-mt"
 
         if spec["blas"].name == "cray-libsci":
             blas = "libsci"
@@ -337,7 +372,6 @@ class PyNumpy(PythonPackage):
 
         settings = {
             "builddir": "build",
-            "compile-args": f"-j{make_jobs}",
             "setup-args": {
                 # https://scipy.github.io/devdocs/building/blas_lapack.html
                 "-Dblas": blas,
@@ -487,8 +521,7 @@ class PyNumpy(PythonPackage):
                 write_library_dirs(f, lapack_lib_dirs)
                 f.write("include_dirs = {0}\n".format(lapack_header_dirs))
 
-    @when("@:1.25")
-    @run_before("install")
+    @run_before("install", when="@:1.25")
     def set_blas_lapack(self):
         self.blas_lapack_site_cfg()
 

@@ -13,10 +13,13 @@ class Fairroot(CMakePackage):
     homepage = "http://fairroot.gsi.de"
     url = "https://github.com/FairRootGroup/FairRoot/archive/v18.8.2.tar.gz"
     git = "https://github.com/FairRootGroup/FairRoot.git"
-    maintainers("dennisklein", "fuhlig1", "jezwilkinson")
+    maintainers("fuhlig1", "jezwilkinson")
 
     tags = ["hep"]
     version("develop", branch="dev")
+    version("19.0.1", sha256="7aac7288bb68f7e37535638f3fd4cf60c2c6b4fc30350462f398bbb93e8eea52")
+    version("19.0.0", sha256="6ad650ece4b673f72f4ddfe2bffeb671239c775b672b4e99673e7145ea6d8ab2")
+    version("18.8.3", sha256="495776f1c7610eb80983a19c0d6120ce1ceb86eb263ebda1a19906b91fc14b83")
     version("18.8.2", sha256="0bc9bafd9583f8a4c92977647c1eb360d66f45fbc6c81a15c5a1613640934684")
 
     variant(
@@ -30,6 +33,7 @@ class Fairroot(CMakePackage):
     variant("examples", default=False, description="Install examples")
 
     depends_on("cmake@3.13.4:", type="build")
+    depends_on("cmake@3.18:", type="build", when="@19:")
     depends_on("boost@1.68.0: +container +serialization")
     depends_on("faircmakemodules@0.2:", when="@18:")
     depends_on("fairlogger@1.4.0:")
@@ -40,6 +44,7 @@ class Fairroot(CMakePackage):
     depends_on("fairsoft-bundle@2025-05", when="@18.8.2:")
 
     depends_on("flatbuffers")
+    depends_on("fmt", when="@19:")
     depends_on("geant3", when="+sim")
     depends_on("geant4", when="+sim")
     depends_on("geant4-vmc", when="+sim")

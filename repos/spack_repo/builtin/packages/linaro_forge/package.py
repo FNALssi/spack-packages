@@ -25,6 +25,22 @@ class LinaroForge(Package):
 
     if platform.machine() == "aarch64":
         version(
+            "26.0.3", sha256="b76137ec53b265ae597c8b764237fcb5f2598bf1179b598179f40be2f074f47d"
+        )
+        version(
+            "26.0.2", sha256="11d9a445230d0293a81c57494eed96babd6951f22ce8c719c00e4e4ed1c7b32e"
+        )
+        version(
+            "26.0.1", sha256="407117379bf5fe3a3a41ec9d8059195a951e27bb9e45c333f8696319f38fe77b"
+        )
+        version("26.0", sha256="e1510c0377bbc49821ba9758c8ed5563fe3e08dc072860319ea0ac5cb088c7c8")
+        version(
+            "25.1.3", sha256="befc2d9689d9eead6b3e6f383d417ca5873c71055013735e8ac3a79545d4cbb7"
+        )
+        version(
+            "25.1.2", sha256="4bd7928dae0d9e3f01c6cecc671ad31b957731a1f137c81993b7b20373c5623d"
+        )
+        version(
             "25.1.1", sha256="41595c4e4e0f560d59cd1c70517471d6fe64ee2c1224d1a531cc2d2a2867ad27"
         )
         version("25.1", sha256="62d215e4ffd20e69863b1ffb7f043968aa7a3bf21280f5dcf2e64a2db7deb675")
@@ -125,6 +141,22 @@ class LinaroForge(Package):
         )
         version("23.0", sha256="0962c7e0da0f450cf6daffe1156e1f59e02c9f643df458ec8458527afcde5b4d")
     elif platform.machine() == "x86_64":
+        version(
+            "26.0.3", sha256="a141a0acf89c6bd5ada44f9045933eaeb874d9526f2873111459636cb36aa0a3"
+        )
+        version(
+            "26.0.2", sha256="ac552111f1256b6a4790b5f12bf74d8849c69adfd38fd1363cba8d95d4b8492a"
+        )
+        version(
+            "26.0.1", sha256="a44ed2bc1f73bc657f47e3a71b728148eed8c93014439ca7d3f2884b0f5e547f"
+        )
+        version("26.0", sha256="060b44e014b13632f1d56386acd3bbbbd7d07b5033dbb2af264bd91c5ac23e1e")
+        version(
+            "25.1.3", sha256="eb23bbe09450ea2d7e5c4054f2e9d07567bf5e5af4a2dfce47f21d329a986b80"
+        )
+        version(
+            "25.1.2", sha256="277f810b6cb52428a10c3317d07d0887140b8dbe5269485ba6715e23be3b55bb"
+        )
         version(
             "25.1.1", sha256="a256fdbf57450511969d1c8121c1c45ec55b1212e2608fae2779b15a103819a1"
         )

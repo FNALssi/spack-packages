@@ -14,12 +14,23 @@ class PyRay(PythonPackage):
     homepage = "https://github.com/ray-project/ray"
     url = "https://github.com/ray-project/ray/archive/ray-0.8.7.tar.gz"
 
+    maintainers("thomas-bouvier")
+
     license("Apache-2.0")
 
     version("2.53.0", sha256="bb2e1393e0617b2edbdbc793718a5dbe98d5024e9f2ab06b33ecc524b02c9e0e")
     version("2.0.1", sha256="b8b2f0a99d2ac4c001ff11c78b4521b217e2a02df95fb6270fd621412143f28b")
 
     variant("default", default=False, description="Install default extras")
+    variant(
+        "tune",
+        default=False,
+        description="Experiment execution and hyperparameter tuning at any scale",
+        when="+rllib",
+    )
+    variant("rllib", default=False, description="Support for reinforcement learning (RL)")
+
+    conflicts("+rllib~tune")
 
     depends_on("c", type="build")
     depends_on("cxx", type="build")
@@ -56,6 +67,22 @@ class PyRay(PythonPackage):
         depends_on("py-virtualenv@20.0.24:", when="@2.53.0:", type=("build", "run"))
         conflicts("py-virtualenv@20.21.1")
 
+    with when("+tune"):
+        depends_on("py-pandas", type=("build", "run"))
+        depends_on("py-pydantic@1,2.12:2", type=("build", "run"))
+        depends_on("py-tensorboardx@1.9:", type=("build", "run"))
+        depends_on("py-requests", type=("build", "run"))
+        depends_on("py-pyarrow@9:", type=("build", "run"))
+        depends_on("py-fsspec", type=("build", "run"))
+
+    with when("+rllib"):
+        depends_on("py-dm-tree", type=("build", "run"))
+        depends_on("py-gymnasium@1.1.1", type=("build", "run"))
+        depends_on("py-lz4", type=("build", "run"))
+        depends_on("py-ormsgpack@1.7.0", type=("build", "run"))
+        depends_on("py-pyyaml", type=("build", "run"))
+        depends_on("py-scipy", type=("build", "run"))
+
     # Old version
     with when("@2.0.1"):
         depends_on("python@3.6:3.10", type=("build", "run"))
@@ -79,6 +106,9 @@ class PyRay(PythonPackage):
 
     build_directory = "python"
 
+    # https://github.com/ray-project/ray/pull/56243
+    patch("missing-headers-gcc15.patch", when="@2.53.0 %gcc@15:")
+
     def patch(self):
         filter_file(
             'bazel_flags = ["--verbose_failures"]',
@@ -94,6 +124,6 @@ class PyRay(PythonPackage):
     @run_before("install")
     def build_dashboard(self):
         with working_dir(join_path("python", "ray", "dashboard", "client")):
-            npm = which("npm")
+            npm = which("npm", required=True)
             npm("ci")
             npm("run", "build")

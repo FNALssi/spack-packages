@@ -33,11 +33,32 @@ class Hdf5(CMakePackage):
 
     # The 'develop' version is renamed so that we could uninstall (or patch) it
     # without affecting other develop version.
-    version("develop-2.0", branch="develop")
+    version("develop-2", branch="develop")
     version("develop-1.14", branch="hdf5_1_14")
     version("develop-1.12", branch="hdf5_1_12")
     version("develop-1.10", branch="hdf5_1_10")
     version("develop-1.8", branch="hdf5_1_8")
+
+    version(
+        "2.2.0",
+        sha256="1a1ab8209b35586fbc1aa279ba76d102130b95badcb20ca329587219112d8c16",
+        url="https://github.com/HDFGroup/hdf5/releases/download/2.2.0/hdf5-2.2.0.tar.gz",
+    )
+    version(
+        "2.1.1",
+        sha256="efff93b5a904d66e8f626d7da60b5eedc9faf544be27dbabbaa87967b8ad798b",
+        url="https://github.com/HDFGroup/hdf5/releases/download/2.1.1/hdf5-2.1.1.tar.gz",
+    )
+    version(
+        "2.1.0",
+        sha256="ce7f5515a95d588b8606c3fb50643f8b88ac52ffbbde9c63bb1edca6a256e964",
+        url="https://github.com/HDFGroup/hdf5/releases/download/2.1.0/hdf5-2.1.0.tar.gz",
+    )
+    version(
+        "2.0.0",
+        sha256="f4c2edc5668fb846627182708dbe1e16c60c467e63177a75b0b9f12c19d7efed",
+        url="https://github.com/HDFGroup/hdf5/releases/download/2.0.0/hdf5-2.0.0.tar.gz",
+    )
 
     # Odd versions are considered experimental releases
     # Even versions are maintenance versions
@@ -113,6 +134,14 @@ class Hdf5(CMakePackage):
 
     variant("hl", default=False, description="Enable the high-level library")
     variant("cxx", default=False, description="Enable C++ support")
+    variant(
+        "cxxstd",
+        default="11",
+        values=("98", "11", "14", "17", "20", "23"),
+        multi=False,
+        when="+cxx",
+        description="Use the specified C++ standard when building.",
+    )
     variant("map", when="@1.14:", default=False, description="Enable MAP API support")
     variant(
         "subfiling", when="@1.14: +mpi", default=False, description="Enable Subfiling VFD support"
@@ -191,6 +220,13 @@ class Hdf5(CMakePackage):
     # See https://github.com/HDFGroup/hdf5/issues/2906#issue-1697749645
     conflicts(
         "+fortran", when="@1.13.3:^cmake@:3.22", msg="cmake_minimum_required is not set correctly."
+    )
+
+    # https://github.com/HDFGroup/hdf5/pull/6267
+    patch(
+        "https://github.com/HDFGroup/hdf5/commit/84e5adf753cdd97a807df2da6338bb0e0cdf9862.patch?full_index=1",
+        sha256="cf8056ec86e01aaf384bef3aecc11dc111a3f11bd83e80d1156af7f939328135",
+        when="@2.1.0",
     )
 
     # HDF5 searches for zlib CMake config files before it falls back to
@@ -341,6 +377,14 @@ class Hdf5(CMakePackage):
                 # in C99:
                 cmake_flags.append("-Wno-error=implicit-function-declaration")
                 # Note that this flag will cause an error if building %nvhpc.
+            if spec.satisfies("@:1.10.8 %gcc@14:"):
+                cmake_flags.extend(
+                    [
+                        "-Wno-error=implicit-int",
+                        "-Wno-error=incompatible-pointer-types",
+                        "-Wno-error=int-conversion",
+                    ]
+                )
             if spec.satisfies("@:1.8.12~shared"):
                 # More recent versions set CMAKE_POSITION_INDEPENDENT_CODE to
                 # True and build with PIC flags.
@@ -518,11 +562,13 @@ class Hdf5(CMakePackage):
             tty.warn("hdf5@:1.8.15+shared does not produce static libraries")
 
         args = [
+            self.define_from_variant("CMAKE_CXX_STANDARD", "cxxstd"),
             # Speed-up the building by skipping the examples:
             self.define("HDF5_BUILD_EXAMPLES", False),
             self.define(
                 "BUILD_TESTING",
-                self.run_tests or
+                self.run_tests
+                or
                 # Version 1.8.22 fails to build the tools when shared libraries
                 # are enabled but the tests are disabled.
                 spec.satisfies("@1.8.22+shared+tools"),
@@ -541,6 +587,9 @@ class Hdf5(CMakePackage):
             self.define_from_variant("HDF5_BUILD_JAVA", "java"),
             self.define_from_variant("HDF5_BUILD_TOOLS", "tools"),
         ]
+
+        if spec.satisfies("@:1.10.8 %gcc@14:"):
+            args.append(self.define("HDF5_DISABLE_COMPILER_WARNINGS", True))
 
         # Always enable this option. This does not actually enable any
         # features: it only *allows* the user to specify certain combinations
@@ -575,11 +624,11 @@ class Hdf5(CMakePackage):
         # breaks CMake's mpi detection for MSMPI.
         if spec.satisfies("+mpi") and "msmpi" not in spec:
             if spec.satisfies("+cxx"):
-                args.append("-DMPI_CXX_COMPILER:PATH=%s" % spec["mpi"].mpicxx)
-            args.append("-DMPI_C_COMPILER:PATH=%s" % spec["mpi"].mpicc)
+                args.append(self.define("MPI_CXX_COMPILER", spec["mpi"].mpicxx))
+            args.append(self.define("MPI_C_COMPILER", spec["mpi"].mpicc))
 
             if spec.satisfies("+fortran"):
-                args.extend(["-DMPI_Fortran_COMPILER:PATH=%s" % spec["mpi"].mpifc])
+                args.append(self.define("MPI_Fortran_COMPILER", spec["mpi"].mpifc))
 
         # work-around for https://github.com/HDFGroup/hdf5/issues/1320
         if spec.satisfies("@1.10.8,1.13.0"):
@@ -589,6 +638,12 @@ class Hdf5(CMakePackage):
         if spec.satisfies("@1.14.4: %aocc"):
             args.append(self.define("HDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16", False))
 
+        # pthreads linking issue with older glibc for @1.14.5:1.14.6 as
+        # discussed in  https://github.com/HDFGroup/hdf5/issues/6201
+        # Should fix #4083, using work-around as discussed in hdf5 ticket
+        if self.spec.satisfies("@1.14.5:1.14.6 +shared +threadsafe ^glibc@:2.34"):
+            # BUILD_SHARED_LIBS and HDF5_ENABLE_THREADSAFE are already set above
+            args.append(self.define("HDF5_ENABLE_THREADS", True))
         return args
 
     @run_after("install")
@@ -752,7 +807,14 @@ int main(int argc, char **argv) {{
 
             cc = Executable(os.environ["CC"])
             cc(*(["-c", "check.c"] + spec["hdf5"].headers.cpp_flags.split()))
-            cc(*(["-o", "check", "check.o"] + spec["hdf5"].libs.ld_flags.split()))
+            ld_flags = spec["hdf5"].libs.ld_flags.split()
+            if spec.satisfies("~shared"):
+                # Static builds require explicit linking
+                ld_flags += spec["zlib-api"].libs.ld_flags.split()
+                if spec.satisfies("+mpi"):
+                    ld_flags += spec["mpi"].libs.ld_flags.split()
+                ld_flags += ["-lm"]
+            cc(*(["-o", "check", "check.o"] + ld_flags))
             try:
                 check = Executable("./check")
                 output = check(output=str)
@@ -796,7 +858,7 @@ int main(int argc, char **argv) {{
                 if not os.path.isfile(path):
                     raise SkipTest(f"{path} is not installed")
 
-                prog = which(path)
+                prog = which(path, required=True)
                 output = prog(option, output=str.split, error=str.split)
                 assert expected in output
 
@@ -805,15 +867,15 @@ int main(int argc, char **argv) {{
         test_data_dir = self.test_suite.current_test_data_dir
         with working_dir(test_data_dir, create=True):
             filename = "spack.h5"
-            h5dump = which(self.prefix.bin.h5dump)
+            h5dump = which(self.prefix.bin.h5dump, required=True)
             out = h5dump(filename, output=str.split, error=str.split)
             expected = get_escaped_text_output("dump.out")
             check_outputs(expected, out)
 
-            h5copy = which(self.prefix.bin.h5copy)
+            h5copy = which(self.prefix.bin.h5copy, required=True)
             copyname = "test.h5"
             options = ["-i", filename, "-s", "Spack", "-o", copyname, "-d", "Spack"]
             h5copy(*options)
 
-            h5diff = which(self.prefix.bin.h5diff)
+            h5diff = which(self.prefix.bin.h5diff, required=True)
             h5diff(filename, copyname)

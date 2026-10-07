@@ -70,7 +70,7 @@ class Mpich(MpichEnvironmentModifications, AutotoolsPackage, CudaPackage, ROCmPa
     list_url = "https://www.mpich.org/static/downloads/"
     list_depth = 1
 
-    maintainers("raffenet", "yfguo")
+    maintainers("raffenet", "hzhou")
     tags = ["e4s"]
     executables = ["^mpichversion$"]
 
@@ -79,6 +79,9 @@ class Mpich(MpichEnvironmentModifications, AutotoolsPackage, CudaPackage, ROCmPa
     license("mpich2")
 
     version("develop", submodules=True)
+    version("5.0.2", sha256="928c2f18d350a91443fe8024ad01ce2c6009e9c551e0a73e797fc567f119137d")
+    version("5.0.1", sha256="8c1832a13ddacf071685069f5fadfd1f2877a29e1a628652892c65211b1f3327")
+    version("5.0.0", sha256="e9350e32224283e95311f22134f36c98e3cd1c665d17fae20a6cc92ed3cffe11")
     version("4.3.2", sha256="47d774587a7156a53752218c811c852e70ac44db9c502dc3f399b4cb817e3818")
     version("4.3.1", sha256="acc11cb2bdc69678dc8bba747c24a28233c58596f81f03785bf2b7bb7a0ef7dc")
     version("4.3.0", sha256="5e04132984ad83cab9cc53f76072d2b5ef5a6d24b0a9ff9047a8ff96121bcc63")
@@ -165,6 +168,13 @@ supported, and netmod is ignored if device is ch3:sock.""",
     )
 
     variant(
+        "mpi5-abi",
+        default=False,
+        when="@5:",
+        description="Enable MPI-5 standard ABI.",
+    )
+
+    variant(
         "datatype-engine",
         default="auto",
         description="controls the datatype engine to use",
@@ -213,7 +223,8 @@ supported, and netmod is ignored if device is ch3:sock.""",
     conflicts("+rocm", when="device=ch3:sock")
     conflicts("+cuda", when="+rocm", msg="CUDA must be disabled to support ROCm")
 
-    provides("mpi@:4.0")
+    provides("mpi@:5.0", when="@5:")
+    provides("mpi@:4.0", when="@:4.3")
     provides("mpi@:3.1", when="@:3.2")
     provides("mpi@:3.0", when="@:3.1")
     provides("mpi@:2.2", when="@:1.2")
@@ -355,7 +366,7 @@ supported, and netmod is ignored if device is ch3:sock.""",
     depends_on("autoconf@2.67:", when="@3.3 +hwloc", type="build")
 
     # MPICH's Yaksa submodule requires python to configure
-    depends_on("python@3.0:", when="@develop", type="build")
+    depends_on("python@3.0:", when="@5:", type="build")
 
     depends_on("cray-pmi", when="pmi=cray")
     depends_on("oneapi-level-zero", when="+level_zero")
@@ -488,12 +499,10 @@ supported, and netmod is ignored if device is ch3:sock.""",
         return results
 
     def flag_handler(self, name, flags):
-        if name == "fflags":
+        if name == "fflags" and "fortran" in self.spec:
             # https://bugzilla.redhat.com/show_bug.cgi?id=1795817
             # https://github.com/spack/spack/issues/17934
-            # TODO: we should add the flag depending on the real Fortran compiler spec and not the
-            #  toolchain spec, which might be mixed.
-            if any(self.spec.satisfies(s) for s in ["%gcc@10:", "%apple-clang@11:", "%clang@11:"]):
+            if any(self.spec["fortran"].satisfies(s) for s in ["gcc@10:", "llvm@11:19.1.7"]):
                 # Note that the flag is not needed to build the package starting version 4.1
                 # (see https://github.com/pmodels/mpich/pull/5840) but we keep adding the flag here
                 # to avoid its presence in the MPI compiler wrappers.
@@ -513,7 +522,7 @@ supported, and netmod is ignored if device is ch3:sock.""",
         if os.path.exists(self.configure_abs_path) and not spec.satisfies("@3.3 +hwloc"):
             return
         # Else bootstrap with autotools
-        bash = which("bash")
+        bash = which("bash", required=True)
         bash("./autogen.sh")
 
     def configure_args(self):
@@ -551,6 +560,9 @@ supported, and netmod is ignored if device is ch3:sock.""",
             )
 
         config_args.extend(self.enable_or_disable("fortran"))
+
+        if spec.satisfies("@5:"):
+            config_args.extend(self.enable_or_disable("mpi-abi", variant="mpi5-abi"))
 
         if "+slurm" in spec:
             config_args.append("--with-slurm=yes")
@@ -670,7 +682,7 @@ supported, and netmod is ignored if device is ch3:sock.""",
         ]
         if "+slurm" in self.spec:
             commands.insert(0, join_path(self.spec["slurm"].prefix.bin))
-        return which(*commands)
+        return which(*commands, required=True)
 
     def run_mpich_test(self, subdir, exe, num_procs=1):
         """Compile and run the test program."""
@@ -680,7 +692,7 @@ supported, and netmod is ignored if device is ch3:sock.""",
             if not os.path.isfile(src):
                 raise SkipTest(f"{src} is missing")
 
-            mpicc = which(os.environ["MPICC"])
+            mpicc = which(os.environ["MPICC"], required=True)
             mpicc("-Wall", "-g", "-o", exe, src)
             if num_procs > 1:
                 launcher = self.mpi_launcher()
@@ -688,7 +700,7 @@ supported, and netmod is ignored if device is ch3:sock.""",
                     launcher("-n", str(num_procs), exe)
                     return
 
-            test_exe = which(exe)
+            test_exe = which(exe, required=True)
             test_exe()
 
     def test_cpi(self):

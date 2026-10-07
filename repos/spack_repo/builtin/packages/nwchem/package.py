@@ -201,7 +201,7 @@ class Nwchem(Package):
             args.extend(["USE_F90_ALLOCATABLE=1"])
 
         if self.spec.variants["armci"].value == "armcimpi":
-            armcimpi = spec["armci"]
+            armcimpi = spec["armcimpi"]
             args.extend(["ARMCI_NETWORK=ARMCI"])
             args.extend([f"EXTERNAL_ARMCI_PATH={armcimpi.prefix}"])
         elif self.spec.variants["armci"].value == "mpi-pr":
@@ -250,7 +250,7 @@ class Nwchem(Package):
             install_tree(join_path("nwpw", "libraryps"), join_path(share_path, "libraryps"))
 
             b_path = join_path(self.stage.source_path, "bin", target, "nwchem")
-            chmod = which("chmod")
+            chmod = which("chmod", required=True)
             chmod("+x", b_path)
             install(b_path, prefix.bin)
 
@@ -267,9 +267,7 @@ class Nwchem(Package):
    spce    {data}/solvents/spce.rst
    charmm_s {data}/charmm_s/
    charmm_x {data}/charmm_x/
-""".format(
-                data=share_path
-            )
+""".format(data=share_path)
             with open(".nwchemrc", "w") as f:
                 f.write(nwchemrc)
             install(".nwchemrc", share_path)

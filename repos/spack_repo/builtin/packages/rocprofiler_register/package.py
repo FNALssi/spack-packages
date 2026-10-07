@@ -3,24 +3,35 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 from spack_repo.builtin.build_systems.cmake import CMakePackage
+from spack_repo.builtin.build_systems.rocm import ROCmLibrary
 
 from spack.package import *
 
 
-class RocprofilerRegister(CMakePackage):
+class RocprofilerRegister(ROCmLibrary, CMakePackage):
     """The rocprofiler-register library is a helper library that coordinates
     the modification of the intercept API table(s) of the HSA/HIP/ROCTx runtime
     libraries by the ROCprofiler (v2) library"""
 
     homepage = "https://github.com/ROCm/rocprofiler-register"
-    git = "https://github.com/ROCm/rocprofiler-register.git"
-    url = "https://github.com/ROCm/rocprofiler-register/archive/refs/tags/rocm-6.4.3.tar.gz"
+    git = "https://github.com/ROCm/rocm-systems.git"
 
     tags = ["rocm"]
-
     maintainers("afzpatel", "srekolam", "renjithravindrankannath")
-
+    libraries = ["librocprofiler-register"]
     license("MIT")
+
+    rocm_url_map = [
+        ("7.1.1", "https://github.com/ROCm/rocprofiler-register/archive/rocm-{0}.tar.gz"),
+        ("7.2.3", "https://github.com/ROCm/rocm-systems/archive/rocm-{0}.tar.gz"),
+        (None, "https://github.com/ROCm/rocm-systems/archive/refs/tags/therock-{1}.{2}.tar.gz"),
+    ]
+    version("10.0.0", sha256="f30517ed6d9e18cde104eb487f173e62fed0175083a9498ca383f8136a9f4eec")
+    version("7.14.0", sha256="8cadf0d5c0f53f334b7b940a78619d1746c913b26ae719e2a09e20a6f7128330")
+    version("7.13.0", sha256="86162d975c59c2f43eb79187378a9b10615db5c1d73441e7e0b7621a7ef8962c")
+    version("7.2.3", sha256="e90cfd8694af28a56433c8827a581ee12a4ba835f0d952436741d9e0f3f8685b")
+    version("7.2.1", sha256="201f19174eafbace2f7abf0d1178ebb17db878191276aba6d23f0e1758b0e10f")
+    version("7.2.0", sha256="728ea7e9bf16e6ed217a0fd1a8c9afaba2dae2e7908fa4e27201e67c803c5638")
     version("7.1.1", sha256="eb34ed91a25b28fbbbe3e486f9865b97513b7a959d5a6b5b0c66a859038115e9")
     version("7.1.0", sha256="29f050480d9efe9a8bd55e274f1d571a1c6001cd1db9f8648a1888f73e4ea2ef")
     version("7.0.2", sha256="c76ffb35c510f8751d6d2db3a6366952ea7a76499556e9d64fdf8102a7a3ca5b")
@@ -42,10 +53,21 @@ class RocprofilerRegister(CMakePackage):
 
     depends_on("c", type="build")
     depends_on("cxx", type="build")
-    depends_on("fmt")
+    # https://github.com/ROCm/rocm-systems/issues/8183
+    depends_on("fmt@:12.1", when="@:7")
+    depends_on("fmt@:12.2", when="@10.0:")
     depends_on("glog")
+    depends_on("libunwind")
 
-    patch("001-add-cpack-fmt-glog.patch")
+    patch("001-add-cpack-fmt-glog.patch", when="@:7.1")
+    patch("001-add-cpack-fmt-glog-7.2.patch", when="@7.2:")
+
+    @property
+    def root_cmakelists_dir(self):
+        if self.spec.satisfies("@7.2:"):
+            return "projects/rocprofiler-register"
+        else:
+            return "."
 
     def cmake_args(self):
         args = ["-DROCPROFILER_REGISTER_BUILD_FMT=OFF", "-DROCPROFILER_REGISTER_BUILD_GLOG=OFF"]

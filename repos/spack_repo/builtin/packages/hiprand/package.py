@@ -2,28 +2,39 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
+import itertools
 import re
 
 from spack_repo.builtin.build_systems.cmake import CMakePackage
 from spack_repo.builtin.build_systems.cuda import CudaPackage
-from spack_repo.builtin.build_systems.rocm import ROCmPackage
+from spack_repo.builtin.build_systems.rocm import ROCmLibrary, ROCmPackage
 
 from spack.package import *
 
 
-class Hiprand(CMakePackage, CudaPackage, ROCmPackage):
+class Hiprand(ROCmLibrary, CMakePackage, CudaPackage, ROCmPackage):
     """The hipRAND project provides an interface for generating pseudo-random
     and quasi-random numbers with either cuRAND or rocRAND backends."""
 
     homepage = "https://github.com/ROCm/hipRAND"
-    git = "https://github.com/ROCm/hipRAND.git"
-    url = "https://github.com/ROCm/hipRAND/archive/rocm-6.4.3.tar.gz"
-    tags = ["rocm"]
+    git = "https://github.com/ROCm/rocm-libraries.git"
 
+    tags = ["rocm"]
     maintainers("cgmb", "srekolam", "renjithravindrankannath", "afzpatel")
     libraries = ["libhiprand"]
-
     license("MIT")
+
+    rocm_url_map = [
+        ("7.1.1", "https://github.com/ROCm/hipRAND/archive/refs/tags/rocm-{0}.tar.gz"),
+        ("7.2.3", "https://github.com/ROCm/rocm-libraries/archive/rocm-{0}.tar.gz"),
+        (None, "https://github.com/ROCm/rocm-libraries/archive/refs/tags/therock-{1}.{2}.tar.gz"),
+    ]
+    version("10.0.0", sha256="eb7f255d6627d3cfb312a7bcf41d701517ecaeac88382b56f2bde8d4947ea592")
+    version("7.14.0", sha256="7bd30a64e1ac823861db07d9fe115256a16f02c527de49a6ecbdbbcb4018c0d8")
+    version("7.13.0", sha256="ae19ac6c8a86d0e1685d937409390506fa0f80f3cb82ea3e3b76071898c25771")
+    version("7.2.3", sha256="300cc50720d40bad7c7ed1f6d67e8c5ebecaba62c07a6ea1cc5813c0ea2e41b5")
+    version("7.2.1", sha256="bc5140deec3b1c93c13796a8a6d2cb7e50aa87fd89f60f87c8d801d66f2fd156")
+    version("7.2.0", sha256="8ad5f4a11f1ed8a7b927f2e65f24083ca6ce902a42021a66a815190a91ccb654")
     version("7.1.1", sha256="f53767646725a3c76be9287196df3e2ae17370c0db3774feba7ca90cfec69785")
     version("7.1.0", sha256="c3bd27e74f0769fe46ea5067e05001f909dc83f01000a22e04e6a0e3d6f4dfc8")
     version("7.0.2", sha256="0c7d18e55fd61070f3bd05b09217caf32c0cb502234b7d732562325b09c9483b")
@@ -101,14 +112,27 @@ class Hiprand(CMakePackage, CudaPackage, ROCmPackage):
         "7.0.2",
         "7.1.0",
         "7.1.1",
+        "7.2.0",
+        "7.2.1",
+        "7.2.3",
+        "7.13.0",
+        "7.14.0",
+        "10.0.0",
     ]:
         depends_on("rocrand@" + ver, when="+rocm @" + ver)
         depends_on(f"rocm-cmake@{ver}", type="build", when=f"@{ver}")
 
-    for tgt in ROCmPackage.amdgpu_targets:
+    for tgt in itertools.chain(["auto"], amdgpu_targets):
         depends_on(
             "rocrand amdgpu_target={0}".format(tgt), when="+rocm amdgpu_target={0}".format(tgt)
         )
+
+    @property
+    def root_cmakelists_dir(self):
+        if self.spec.satisfies("@7.2:"):
+            return "projects/hiprand"
+        else:
+            return "."
 
     def setup_build_environment(self, env: EnvironmentModifications) -> None:
         if self.spec.satisfies("+rocm"):
@@ -144,4 +168,7 @@ class Hiprand(CMakePackage, CudaPackage, ROCmPackage):
 
         if self.spec.satisfies("@:6.3.1"):
             args.append(self.define("BUILD_FILE_REORG_BACKWARD_COMPATIBILITY", True))
+        if "auto" not in self.spec.variants["amdgpu_target"]:
+            args.append(self.define_from_variant("GPU_TARGETS", "amdgpu_target"))
+
         return args

@@ -13,6 +13,10 @@ class PyGrpcioTools(PythonPackage):
     homepage = "https://grpc.io/"
     pypi = "grpcio-tools/grpcio-tools-1.64.0.tar.gz"
 
+    license("Apache-2.0")
+
+    version("1.81.1", sha256="a22a3870180927fdd84e2b27d079ef5b7f5f8c6110181b6736afc17a463481f1")
+    version("1.78.0", sha256="4b0dd86560274316e155d925158276f8564508193088bc43e20d3f5dff956b2b")
     version("1.64.0", sha256="fa4c47897a0ddb78204456d002923294724e1b7fc87f0745528727383c2260ad")
     version("1.63.2", sha256="21f46ba172654f964c7c730ef7b2d2b304a4437ff71d1734fedc47c69c97da4a")
     version("1.62.2", sha256="5fd5e1582b678e6b941ee5f5809340be5e0724691df5299aae8226640f94e18f")
@@ -22,13 +26,24 @@ class PyGrpcioTools(PythonPackage):
     version("1.42.0", sha256="d0a0daa82eb2c2fb8e12b82a458d1b7c5516fe1135551da92b1a02e2cba93422")
     version("1.39.0", sha256="39dfe7415bc0d3860fdb8dd90607594b046b88b57dbe64284efa4820f951c805")
 
-    depends_on("c", type="build")  # generated
-    depends_on("cxx", type="build")  # generated
+    depends_on("c", type="build")
+    depends_on("cxx", type="build")
 
+    # https://github.com/grpc/grpc/blob/v1.81.0/tools/distrib/python/grpcio_tools/python_version.py
+    depends_on("python@3.10:", when="@1.81.0:", type=("build", "run"))
+    depends_on("python@3.9:", when="@1.71.0:", type=("build", "run"))
     depends_on("python@3.6:", type=("build", "run"))
+    depends_on("py-setuptools@77.0.1:", when="@1.78.0:", type="build")
     depends_on("py-setuptools", type="build")
-    depends_on("py-protobuf@3.12.0:3", when="@1.48.1:", type=("build", "run"))
-    depends_on("py-protobuf@3.5.0.post1:3", type=("build", "run"))
+    # https://github.com/grpc/grpc/blob/v1.73.1/tools/distrib/python/grpcio_tools/setup.py
+    depends_on("py-protobuf@6.31.1:6", when="@1.74.0:", type=("build", "run"))
+    depends_on("py-protobuf@4.21.6:4", when="@1.50:1.62", type=("build", "run"))
+    depends_on("py-protobuf@4.21.3:4", when="@1.49", type=("build", "run"))
+    depends_on("py-protobuf@3.12.0:3", when="@1.46:1.48", type=("build", "run"))
+    depends_on("py-protobuf@3.5.0.post1:3", when="@:1.45", type=("build", "run"))
+    # https://github.com/grpc/grpc/blob/v1.78.0/tools/distrib/python/grpcio_tools/grpc_version.pyz
+    depends_on("py-grpcio@1.81.1:", when="@1.81.1:", type=("build", "run"))
+    depends_on("py-grpcio@1.78.0:", when="@1.78.0:", type=("build", "run"))
     depends_on("py-grpcio@1.64.0:", when="@1.64.0:", type=("build", "run"))
     depends_on("py-grpcio@1.63.2:", when="@1.63.2:", type=("build", "run"))
     depends_on("py-grpcio@1.62.2:", when="@1.62.2:", type=("build", "run"))
@@ -37,11 +52,20 @@ class PyGrpcioTools(PythonPackage):
     depends_on("py-grpcio@1.48.1:", when="@1.48.1:", type=("build", "run"))
     depends_on("py-grpcio@1.42.0:", when="@1.42.0:", type=("build", "run"))
     depends_on("py-grpcio@1.39.0:", when="@1.39.0:1.41", type=("build", "run"))
+    depends_on("py-cython@3.1.1:", when="@1.78.0:", type="build")
     depends_on("py-cython@0.23:", type="build")
     depends_on("openssl")
     depends_on("zlib-api")
     depends_on("c-ares")
     depends_on("re2+shared")
+
+    def url_for_version(self, version):
+        url = "https://files.pythonhosted.org/packages/source/g/grpcio_tools/grpcio{0}tools-{1}.tar.gz"
+        if version > Version("1.62.0"):
+            sep = "_"
+        else:
+            sep = "-"
+        return url.format(sep, version)
 
     def setup_build_environment(self, env: EnvironmentModifications) -> None:
         env.set("GRPC_PYTHON_BUILD_WITH_CYTHON", "True")
@@ -59,6 +83,11 @@ class PyGrpcioTools(PythonPackage):
                 env.prepend_path("LIBRARY_PATH", p)
             for p in query.headers.directories:
                 env.prepend_path("CPATH", p)
+
+    def url_for_version(self, version):
+        if version >= Version("1.63.0"):
+            return f"https://files.pythonhosted.org/packages/source/g/grpcio-tools/grpcio_tools-{version}.tar.gz"
+        return super().url_for_version(version)
 
     def patch(self):
         if self.spec.satisfies("%fj"):

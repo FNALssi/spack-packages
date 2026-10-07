@@ -29,23 +29,13 @@ class Clingo(CMakePackage):
     version("master", branch="master", submodules=True)
     version("spack", commit="2a025667090d71b2c9dce60fe924feb6bde8f667", submodules=True)
 
+    version("5.8.2", sha256="af961e4e8122b9e1fa325ae20c98f0a17b2087e2c777832ae6e47025ec921331")
+    version("5.8.1", sha256="28fe78322cefb92e0f68f350777e19407d07bbb5179ca725fc6f77d538f0d19a")
     version("5.8.0", sha256="4ddd5975e79d7a0f8d126039f1b923a371b1a43e0e0687e1537a37d6d6d5cc7c")
-    version(
-        "5.7.1",
-        sha256="544b76779676075bb4f557f05a015cbdbfbd0df4b2cc925ad976e86870154d81",
-        preferred=True,
-    )
+    version("5.7.1", sha256="544b76779676075bb4f557f05a015cbdbfbd0df4b2cc925ad976e86870154d81")
     version("5.6.2", sha256="81eb7b14977ac57c97c905bd570f30be2859eabc7fe534da3cdc65eaca44f5be")
     version("5.5.2", sha256="a2a0a590485e26dce18860ac002576232d70accc5bfcb11c0c22e66beb23baa6")
     version("5.4.1", sha256="ac6606388abfe2482167ce8fd4eb0737ef6abeeb35a9d3ac3016c6f715bfee02")
-
-    with default_args(deprecated=True):
-        version("5.7.0", sha256="ed5401bda54315184697fd69ff0f15389c62779e812058a5f296ba587ed9c10b")
-        version("5.5.1", sha256="b9cf2ba2001f8241b8b1d369b6f353e628582e2a00f13566e51c03c4dd61f67e")
-        version("5.5.0", sha256="c9d7004a0caec61b636ad1c1960fbf339ef8fdee9719321fc1b6b210613a8499")
-        version("5.4.0", sha256="e2de331ee0a6d254193aab5995338a621372517adcf91568092be8ac511c18f3")
-        version("5.3.0", sha256="b0d406d2809352caef7fccf69e8864d55e81ee84f4888b0744894977f703f976")
-        version("5.2.2", sha256="da1ef8142e75c5a6f23c9403b90d4f40b9f862969ba71e2aaee9a257d058bfcf")
 
     depends_on("c", type="build")
     depends_on("cxx", type="build")
@@ -64,11 +54,13 @@ class Clingo(CMakePackage):
 
     with when("@5.6:5.8,master"):
         depends_on("re2c@1.1.1:", type="build")
-        # forward compat issue: reference to undefined condition 'aspif'
-        depends_on("re2c@:3", type="build")
         depends_on("bison@2.5:", type="build", when="platform=linux")
         depends_on("bison@2.5:", type="build", when="platform=darwin")
         depends_on("bison@2.5:", type="build", when="platform=freebsd")
+
+    # Lexers use a re2c condition that 4.3+ rejects ("undefined condition 'aspif'"),
+    # fixed upstream in 5.8.1 and master. See https://github.com/potassco/clingo/issues/591
+    depends_on("re2c@:3", type="build", when="@5.6:5.8.0")
 
     with when("@6:"):
         depends_on("re2c@3:", type="build")

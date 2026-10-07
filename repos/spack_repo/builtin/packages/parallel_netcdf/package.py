@@ -61,7 +61,7 @@ class ParallelNetcdf(AutotoolsPackage):
 
     depends_on("c", type="build")  # generated
     depends_on("cxx", type="build")  # generated
-    depends_on("fortran", type="build")  # generated
+    depends_on("fortran", when="+fortran", type="build")
 
     depends_on("mpi")
 
@@ -129,13 +129,15 @@ class ParallelNetcdf(AutotoolsPackage):
         if self.spec.satisfies("+pic"):
             flags["CFLAGS"].append(self.compiler.cc_pic_flag)
             flags["CXXFLAGS"].append(self.compiler.cxx_pic_flag)
-            flags["FFLAGS"].append(self.compiler.f77_pic_flag)
-            flags["FCFLAGS"].append(self.compiler.fc_pic_flag)
+            if self.spec.satisfies("+fortran"):
+                flags["FFLAGS"].append(self.compiler.f77_pic_flag)
+                flags["FCFLAGS"].append(self.compiler.fc_pic_flag)
 
         # https://github.com/Parallel-NetCDF/PnetCDF/issues/61
         if self.spec.satisfies("@:1.12.1%gcc@10:"):
-            flags["FFLAGS"].append("-fallow-argument-mismatch")
-            flags["FCFLAGS"].append("-fallow-argument-mismatch")
+            if self.spec.satisfies("+fortran"):
+                flags["FFLAGS"].append("-fallow-argument-mismatch")
+                flags["FCFLAGS"].append("-fallow-argument-mismatch")
 
         for key, value in sorted(flags.items()):
             if value:
@@ -184,7 +186,7 @@ class ParallelNetcdf(AutotoolsPackage):
         ]
 
         with working_dir(test_dir):
-            mpicxx = which(self.spec["mpi"].prefix.bin.mpicxx)
+            mpicxx = which(self.spec["mpi"].prefix.bin.mpicxx, required=True)
             mpicxx(*options)
 
             mpiexe_list = [
@@ -198,9 +200,9 @@ class ParallelNetcdf(AutotoolsPackage):
                 try:
                     args = ["--immediate=30"] if mpiexe == "srun" else []
                     args += ["-n", "1", test_exe]
-                    exe = which(mpiexe)
+                    exe = which(mpiexe, required=True)
                     exe(*args)
-                    rm = which("rm")
+                    rm = which("rm", required=True)
                     rm("-f", "column_wise")
                     return
 

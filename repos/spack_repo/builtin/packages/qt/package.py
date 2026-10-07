@@ -32,6 +32,7 @@ class Qt(Package):
 
     license("LGPL-3.0-only")
 
+    version("5.15.18", sha256="cea1fbabf02455f3f0e8eaa839f5d6f45cdb56b62c8a83af5c1d00ac05f912ea")
     version("5.15.17", sha256="85eb566333d6ba59be3a97c9445a6e52f2af1b52fc3c54b8a2e7f9ea040a7de4")
     version("5.15.16", sha256="efa99827027782974356aceff8a52bd3d2a8a93a54dd0db4cca41b5e35f1041c")
     version("5.15.15", sha256="b423c30fe3ace7402e5301afbb464febfb3da33d6282a37a665be1e51502335e")
@@ -176,7 +177,7 @@ class Qt(Package):
         "https://github.com/qt/qtbase/commit/cdf64b0e47115cc473e1afd1472b4b09e130b2a5.patch?full_index=1",
         sha256="2b881ffb2808f8fa79f51f8bec71be91a886bcdc59b1d7b6986cba26ed18d1d3",
         working_dir="qtbase",
-        when="@5.12.1: %apple-clang@15:",
+        when="@5.12.1:5.15.17 %apple-clang@15:",
     )
     conflicts("%apple-clang@15:", when="@:5.12.0")
 
@@ -252,7 +253,7 @@ class Qt(Package):
     depends_on("python", when="@5.7.0:", type="build")
 
     # Dependencies, then variant- and version-specific dependencies
-    depends_on("icu4c")
+    depends_on("icu4c@:74")  # @75: requires cxxstd 17 which is not modelled here
     depends_on("jpeg")
     depends_on("libtiff")
     depends_on("libxml2")
@@ -659,10 +660,13 @@ class Qt(Package):
 
         if "+gui" in spec:
             use_spack_dep("freetype")
+
             if spec.satisfies("platform=linux") or spec.satisfies("platform=freebsd"):
                 config_args.append("-fontconfig")
-            # Avoid sporadic vkconvenience bug by explicitly disabling vulkan
-            config_args.append("-no-vulkan")
+
+            if spec.satisfies("@5.10:5"):
+                # Avoid sporadic vkconvenience bug by explicitly disabling vulkan
+                config_args.append("-no-vulkan")
         else:
             config_args.append("-no-freetype")
             config_args.append("-no-gui")
@@ -773,7 +777,7 @@ class Qt(Package):
             config_args.extend(["-nomake", "demos"])
 
         if MACOS_VERSION:
-            sdkpath = which("xcrun")("--show-sdk-path", output=str).strip()
+            sdkpath = which("xcrun", required=True)("--show-sdk-path", output=str).strip()
             config_args.extend(["-cocoa", "-sdk", sdkpath])
 
         if IS_WINDOWS:
