@@ -95,6 +95,7 @@ class Doxygen(CMakePackage):
     depends_on("cmake@3.3:", type="build", when="@1.8.18:")
     depends_on("cmake@3.12:", type="build", when="@1.9.8:")
     depends_on("cmake@3.14:", type="build", when="@1.10:")
+    depends_on("gmake", type="build")
 
     depends_on("python", type="build")  # 2 or 3 OK; used in CMake build
     depends_on("iconv")

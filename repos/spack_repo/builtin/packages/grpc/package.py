@@ -60,7 +60,7 @@ class Grpc(CMakePackage):
     )
     variant(
         "cxxstd",
-        default="11",
+        default="14",
         values=("11", "14", "17"),
         multi=False,
         description="Use the specified C++ standard when building.",

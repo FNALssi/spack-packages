@@ -11,12 +11,16 @@ class PyGrpcioTools(PythonPackage):
     """Protobuf code generator for gRPC"""
 
     homepage = "https://grpc.io/"
-    pypi = "grpcio-tools/grpcio-tools-1.42.0.tar.gz"
+    pypi = "grpcio-tools/grpcio-tools-1.64.0.tar.gz"
 
     license("Apache-2.0")
 
+
     version("1.81.1", sha256="a22a3870180927fdd84e2b27d079ef5b7f5f8c6110181b6736afc17a463481f1")
     version("1.78.0", sha256="4b0dd86560274316e155d925158276f8564508193088bc43e20d3f5dff956b2b")
+    version("1.64.0", sha256="fa4c47897a0ddb78204456d002923294724e1b7fc87f0745528727383c2260ad")
+    version("1.63.2", sha256="21f46ba172654f964c7c730ef7b2d2b304a4437ff71d1734fedc47c69c97da4a")
+
     version("1.62.2", sha256="5fd5e1582b678e6b941ee5f5809340be5e0724691df5299aae8226640f94e18f")
     version("1.56.2", sha256="82af2f4040084141a732f0ef1ecf3f14fdf629923d74d850415e4d09a077e77a")
     version("1.48.2", sha256="8902a035708555cddbd61b5467cea127484362decc52de03f061a1a520fe90cd")
@@ -42,6 +46,8 @@ class PyGrpcioTools(PythonPackage):
     # https://github.com/grpc/grpc/blob/v1.78.0/tools/distrib/python/grpcio_tools/grpc_version.pyz
     depends_on("py-grpcio@1.81.1:", when="@1.81.1:", type=("build", "run"))
     depends_on("py-grpcio@1.78.0:", when="@1.78.0:", type=("build", "run"))
+    depends_on("py-grpcio@1.64.0:", when="@1.64.0:", type=("build", "run"))
+    depends_on("py-grpcio@1.63.2:", when="@1.63.2:", type=("build", "run"))
     depends_on("py-grpcio@1.62.2:", when="@1.62.2:", type=("build", "run"))
     depends_on("py-grpcio@1.56.2:", when="@1.56.2:", type=("build", "run"))
     depends_on("py-grpcio@1.48.2:", when="@1.48.2:", type=("build", "run"))

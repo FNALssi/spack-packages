@@ -5,7 +5,8 @@
 from spack_repo.builtin.build_systems.python import PythonPackage
 
 from spack.package import *
-
+import glob
+import os
 
 class PyRucioClients(PythonPackage):
     """Rucio Client Lite Package"""
@@ -18,6 +19,8 @@ class PyRucioClients(PythonPackage):
     license("Apache-2.0", checked_by="wdconinc")
 
     version("40.2.0", sha256="0bbd4ef128b2dc0664dadee51a222f29c6eb4ff1b4d26ef0f597f73095de7c98")
+    version("39.0.0", sha256="a83632897cfc2cc9052848b1b795fb71b2cf8d0a7920a6cff1f7367874bac72a")
+    version("38.5.1", sha256="3cfe97c5e5996cfc5861b259ff0bed3369e7379bcaa826b6d181ee5b939ac401")
     version("38.0.0", sha256="d49f912f2f98870cab2227e0464129ba0954e99b975d0225126cca1b9d9c983c")
     version("37.3.0", sha256="b4bca8d451bc34528797ca188884a0c8b5ddfef2d32803765e6333455879f819")
     version(
@@ -39,7 +42,7 @@ class PyRucioClients(PythonPackage):
     variant("dumper", default=False, description="Enable file type identification using libmagic")
 
     # requirements/requirements.client.txt
-    depends_on("python@3.9:", type=("build", "run"))
+    depends_on("python", type=("build", "run"))
     depends_on("py-setuptools", type="build")
     depends_on("py-setuptools@78.1:", type="build", when="@39:")
     depends_on("py-wheel@0.45.1:", type="build", when="@39:")
@@ -51,9 +54,7 @@ class PyRucioClients(PythonPackage):
     depends_on("py-requests@2.32.2:", type=("build", "run"), when="@:36")
     depends_on("py-requests@2.32.3:", type=("build", "run"), when="@37:")
     depends_on("py-requests@2.32.5:", type=("build", "run"), when="@40:")
-    depends_on("py-urllib3@1.26.18:", type=("build", "run"), when="@:36")
-    depends_on("py-urllib3@2.3.0:", type=("build", "run"), when="@37:")
-    depends_on("py-urllib3@2.5.0:", type=("build", "run"), when="@40:")
+    depends_on("py-urllib3", type=("build", "run"))
 
     depends_on("py-dogpile-cache@1.2.2:", type=("build", "run"))
     depends_on("py-tabulate@0.9.0:", type=("build", "run"))
@@ -67,6 +68,7 @@ class PyRucioClients(PythonPackage):
     depends_on("py-typing-extensions@4.14.0:", type=("build", "run"), when="@38:")
     depends_on("py-typing-extensions@4.15.0:", type=("build", "run"), when="@40:")
     depends_on("py-click@8.1.7:", type=("build", "run"), when="@37:")
+    depends_on("py-gfal2-python",  type=("build", "run"))
     depends_on("py-click@8.3.0:", type=("build", "run"), when="@40:")
 
     with when("+ssh"):

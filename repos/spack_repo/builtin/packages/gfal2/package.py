@@ -33,6 +33,7 @@ class Gfal2(CMakePackage):
     depends_on("glib")
     depends_on("json-c")
     depends_on("openldap")
+    depends_on("pkgconfig", type="build")
 
     depends_on("dcap", when="+dcap")
     depends_on("zlib", when="+file")
@@ -69,6 +70,11 @@ class Gfal2(CMakePackage):
             r"find_path\(CRYPTOPP_INCLUDE_DIRS",
             "find_path(CRYPTOPP_INCLUDE_DIRS PATH_SUFFIXES include/cryptopp",
             "cmake/modules/FindCryptopp.cmake",
+        )
+        filter_file(
+           r"NAMES ldap_r ldap",
+           "NAMES ldap",
+           "src/utils/CMakeLists.txt",
         )
 
     def cmake_args(self):

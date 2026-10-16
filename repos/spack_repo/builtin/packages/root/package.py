@@ -196,13 +196,15 @@ class Root(CMakePackage):
 
     variant("aqua", default=_is_macos, description="Enable native macOS (Cocoa) interface")
     variant("arrow", default=False, description="Enable Arrow interface")
-    variant("cuda", default=False, description="Enable CUDA support")
-    variant("cudnn", default=False, description="Enable cuDNN support")
+    variant("cuda", when="@6.08.00:", default=False, description="Enable CUDA support")
+    variant("cudnn", when="@6.20.02:", default=False, description="Enable cuDNN support")
     # C++ module support in ROOT seemingly not currently working in macOS,
     # will lead to build errors if turned on
     # See https://root-forum.cern.ch/t/build-error-on-macos-macports-with-unctrl-h-ncurses-h/40239/22
-    variant("cxxmodules", default=not _is_macos, description="Enable C++ modules")
-    variant("daos", default=False, description="Enable RNTuple support for DAOS storage")
+    variant("cxxmodules", when="@6.16:", default=True, description="Enable C++ modules")
+    variant(
+        "daos", default=False, description="Enable RNTuple support for DAOS storage", when="@6.26:"
+    )
     variant("davix", default=True, description="Compile with external Davix")
     variant("dcache", default=False, description="Enable support for dCache")
     variant("emacs", default=False, description="Enable Emacs support")
@@ -357,6 +359,7 @@ class Root(CMakePackage):
         depends_on("glibc@2.25:", when="^[virtuals=libc] glibc")
         depends_on("musl@1.1.20:", when="^[virtuals=libc] musl")
 
+    depends_on("gmake", type="build") #PG needed because ninja invoking make in subpackage build results in jobserver error.
     depends_on("freetype")
     depends_on("giflib")
     depends_on("jpeg")
@@ -655,7 +658,6 @@ class Root(CMakePackage):
             define("gnuinstall", True),
             define("libcxx", False),
             define("roottest", False),
-            define_from_variant("runtime_cxxmodules", "cxxmodules"),
             define_from_variant("rpath"),
             define("shared", True),
             define("soversion", True),
