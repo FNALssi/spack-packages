@@ -140,7 +140,7 @@ class Grpc(CMakePackage):
                 glob_path = join_path(self.stage.source_path, "src/core/lib/gprpp/glob.cc")
             else:
                 glob_path = join_path(self.stage.source_path, "src/core/util/glob.cc")
-            with when("@1.51:"):
+            if os.path.isfile(glob_path):
                 filter_file(
                     r'(#include "absl/strings/string_view.h")',
                     '#include <algorithm>\n#include "absl/strings/string_view.h"',
